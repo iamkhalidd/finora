@@ -60,19 +60,19 @@ export default function DashboardPage() {
       <GlassCard primary>
         <p className="text-body-sm font-body-sm text-on-surface-variant z-10">Total Balance</p>
         <h1 className="text-display-lg font-display-lg text-on-surface z-10 font-data-lg mt-1">
-          ${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          ₦{totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </h1>
         <div className="flex gap-2 mt-4 z-10">
           <div className="bg-tertiary/10 border border-tertiary/20 px-3 py-1.5 rounded-full flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px] text-tertiary">trending_up</span>
             <span className="text-label-xs font-label-xs text-tertiary">
-              +${totalIncome.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              +₦{totalIncome.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </span>
           </div>
           <div className="bg-error/10 border border-error/20 px-3 py-1.5 rounded-full flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px] text-error">trending_down</span>
             <span className="text-label-xs font-label-xs text-error">
-              -${totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              -₦{totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </span>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
         <DonutChart
           data={txSummary.categories}
           centerLabel="Total Spent"
-          centerValue={`$${totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+          centerValue={`₦₦{totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
         />
 
         {/* Legend listing */}
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-body-sm text-on-surface font-semibold font-data-lg">
-                    ${cat.value.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    ₦{cat.value.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                   </span>
                   <span className="text-label-xs text-outline font-bold">{cat.percentage}%</span>
                 </div>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                   className="glass-card glass-edge rounded-xl p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ₦{
                       isIncome ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
                     }`}>
                       <span className="material-symbols-outlined text-[20px]">
@@ -175,8 +175,8 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <span className={`text-body-md font-semibold font-data-lg ${isIncome ? "text-tertiary" : "text-error"}`}>
-                    {isIncome ? "+" : "-"}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  <span className={`text-body-md font-semibold font-data-lg ₦{isIncome ? "text-tertiary" : "text-error"}`}>
+                    {isIncome ? "+" : "-"}₦{tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               );

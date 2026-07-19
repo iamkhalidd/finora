@@ -78,9 +78,9 @@ export default function BudgetsPage() {
         </div>
         <div className="flex justify-between items-baseline my-1">
           <h2 className="text-display-sm font-bold font-data-lg text-on-surface">
-            ${totalSpent.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            ₦{totalSpent.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             <span className="text-body-sm text-outline font-normal ml-1">
-              / ${totalLimit.toLocaleString("en-US", { maximumFractionDigits: 0 })} spent
+              / ₦{totalLimit.toLocaleString("en-US", { maximumFractionDigits: 0 })} spent
             </span>
           </h2>
           <span className="text-label-xs font-bold text-outline">
@@ -91,7 +91,7 @@ export default function BudgetsPage() {
         <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
           <div
             className="h-full bg-primary transition-all duration-500"
-            style={{ width: `${Math.min(totalPercentage, 100)}%` }}
+            style={{ width: `₦{Math.min(totalPercentage, 100)}%` }}
           />
         </div>
       </GlassCard>
@@ -136,13 +136,13 @@ export default function BudgetsPage() {
                       <div className="flex flex-col">
                         <span className="text-body-sm font-bold text-on-surface">{b.category}</span>
                         <span className="text-[11px] text-outline">
-                          ${b.spent.toLocaleString("en-US", { maximumFractionDigits: 0 })} spent of ${b.limit.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                          ₦{b.spent.toLocaleString("en-US", { maximumFractionDigits: 0 })} spent of ₦{b.limit.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={`text-label-xs font-bold px-2 py-1 bg-white/5 rounded-full ${textColor}`}>
+                      <span className={`text-label-xs font-bold px-2 py-1 bg-white/5 rounded-full ₦{textColor}`}>
                         {percentage.toFixed(0)}%
                       </span>
                       <button
@@ -161,8 +161,8 @@ export default function BudgetsPage() {
                   {/* Progressive Bar */}
                   <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-500 ${barColor}`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
+                      className={`h-full transition-all duration-500 ₦{barColor}`}
+                      style={{ width: `₦{Math.min(percentage, 100)}%` }}
                     />
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function BudgetsPage() {
                   <button
                     key={catName}
                     onClick={() => setSelectedCategory(catName)}
-                    className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border transition-all ${
+                    className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border transition-all ₦{
                       isSel
                         ? "bg-primary/20 border-primary text-primary"
                         : "bg-surface-container border-white/5 text-on-surface-variant text-[11px]"
@@ -214,7 +214,7 @@ export default function BudgetsPage() {
 
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">
-              Monthly Limit Amount ($)
+              Monthly Limit Amount (₦)
             </label>
             <input
               type="number"

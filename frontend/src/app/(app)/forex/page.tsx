@@ -54,8 +54,8 @@ export default function ForexJournalPage() {
         </GlassCard>
         <GlassCard className="p-4 flex flex-col gap-1">
           <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Total P&L</span>
-          <span className={`text-xl font-bold font-data-lg ${stats.total_p_l >= 0 ? "text-tertiary" : "text-error"}`}>
-            {stats.total_p_l >= 0 ? "+" : ""}${stats.total_p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          <span className={`text-xl font-bold font-data-lg ₦{stats.total_p_l >= 0 ? "text-tertiary" : "text-error"}`}>
+            {stats.total_p_l >= 0 ? "+" : ""}₦{stats.total_p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </GlassCard>
         <GlassCard className="p-4 flex flex-col gap-1">
@@ -82,7 +82,7 @@ export default function ForexJournalPage() {
               >
                 <div className="flex justify-between items-center">
                   <span className="text-[11px] font-bold text-on-surface-variant">{pair}</span>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ₦{
                     isUp ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
                   }`}>
                     {isUp ? "+" : ""}{lPrice ? lPrice.change : "0.00"}%
@@ -117,11 +117,11 @@ export default function ForexJournalPage() {
               return (
                 <div
                   key={t.id}
-                  onClick={() => router.push(`/forex/${t.id}`)}
+                  onClick={() => router.push(`/forex/₦{t.id}`)}
                   className="glass-panel glass-edge rounded-xl p-4 flex items-center justify-between hover:bg-white/[0.02] cursor-pointer transition-all duration-200"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[12px] ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[12px] ₦{
                       t.direction === "BUY" ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
                     }`}>
                       {t.direction}
@@ -139,8 +139,8 @@ export default function ForexJournalPage() {
                     </div>
                   </div>
 
-                  <span className={`text-body-md font-semibold font-data-lg ${isProfit ? "text-tertiary" : "text-error"}`}>
-                    {isProfit ? "+" : ""}${t.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  <span className={`text-body-md font-semibold font-data-lg ₦{isProfit ? "text-tertiary" : "text-error"}`}>
+                    {isProfit ? "+" : ""}₦{t.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               );

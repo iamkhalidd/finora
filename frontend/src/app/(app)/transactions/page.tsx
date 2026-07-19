@@ -49,7 +49,7 @@ export default function TransactionsPage() {
         <h1 className="text-headline-lg font-headline-lg text-on-surface font-bold">Transactions</h1>
         <button
           onClick={() => setShowDatePicker(!showDatePicker)}
-          className={`p-2 rounded-lg border transition-all ${
+          className={`p-2 rounded-lg border transition-all ₦{
             fromDate || toDate
               ? "bg-primary/20 border-primary text-primary"
               : "bg-surface-container border-white/5 text-on-surface-variant"
@@ -99,7 +99,7 @@ export default function TransactionsPage() {
           <button
             key={tab}
             onClick={() => setFilterType(tab)}
-            className={`flex-1 py-2.5 rounded-lg text-label-xs font-bold capitalize transition-all ${
+            className={`flex-1 py-2.5 rounded-lg text-label-xs font-bold capitalize transition-all ₦{
               filterType === tab
                 ? "bg-primary text-on-primary shadow-lg"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -133,7 +133,7 @@ export default function TransactionsPage() {
                       className="glass-card glass-edge rounded-xl p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors relative group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ₦{
                           isIncome ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
                         }`}>
                           <span className="material-symbols-outlined text-[20px]">
@@ -151,8 +151,8 @@ export default function TransactionsPage() {
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className={`text-body-md font-semibold font-data-lg ${isIncome ? "text-tertiary" : "text-error"}`}>
-                          {isIncome ? "+" : "-"}${tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        <span className={`text-body-md font-semibold font-data-lg ₦{isIncome ? "text-tertiary" : "text-error"}`}>
+                          {isIncome ? "+" : "-"}₦{tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                         </span>
 
                         {/* Instant delete button */}

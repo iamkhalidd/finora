@@ -17,7 +17,7 @@ export default function TradeDetailPage() {
   const { data: trade, isLoading } = useQuery({
     queryKey: ["trade-detail", id],
     queryFn: async () => {
-      const response = await api.get(`/api/v1/trades/${id}`);
+      const response = await api.get(`/api/v1/trades/₦{id}`);
       return response.data;
     },
     enabled: !!id,
@@ -25,7 +25,7 @@ export default function TradeDetailPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.delete(`/api/v1/trades/${id}`);
+      const response = await api.delete(`/api/v1/trades/₦{id}`);
       return response.data;
     },
     onSuccess: () => {
@@ -83,10 +83,10 @@ export default function TradeDetailPage() {
         <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
           Profit / Loss Yield
         </span>
-        <h1 className={`text-display-lg font-bold font-data-lg ${isProfit ? "text-tertiary" : "text-error"}`}>
-          {isProfit ? "+" : ""}${trade.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        <h1 className={`text-display-lg font-bold font-data-lg ₦{isProfit ? "text-tertiary" : "text-error"}`}>
+          {isProfit ? "+" : ""}₦{trade.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
         </h1>
-        <div className={`mt-2 px-3 py-1 rounded-full text-label-xs font-bold ${
+        <div className={`mt-2 px-3 py-1 rounded-full text-label-xs font-bold ₦{
           trade.direction === "BUY" ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
         }`}>
           {trade.direction} POSITION

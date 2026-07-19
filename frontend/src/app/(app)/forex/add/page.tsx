@@ -143,7 +143,7 @@ export default function AddTradePage() {
                   <button
                     key={dir}
                     onClick={() => setDirection(dir)}
-                    className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ${
+                    className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ₦{
                       direction === dir
                         ? dir === "BUY"
                           ? "bg-tertiary text-on-tertiary shadow-md"
@@ -241,7 +241,7 @@ export default function AddTradePage() {
                 <button
                   key={s}
                   onClick={() => setSession(s)}
-                  className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ${
+                  className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ₦{
                     session === s
                       ? "bg-primary text-on-primary shadow-md"
                       : "text-on-surface-variant"
@@ -286,8 +286,8 @@ export default function AddTradePage() {
             <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
               Estimated P&L
             </span>
-            <span className={`text-[15px] font-bold font-data-lg ${estimatedPL >= 0 ? "text-tertiary" : "text-error"}`}>
-              {estimatedPL >= 0 ? "+" : ""}${estimatedPL.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className={`text-[15px] font-bold font-data-lg ₦{estimatedPL >= 0 ? "text-tertiary" : "text-error"}`}>
+              {estimatedPL >= 0 ? "+" : ""}₦{estimatedPL.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
 

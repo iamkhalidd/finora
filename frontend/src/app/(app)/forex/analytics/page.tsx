@@ -36,7 +36,7 @@ export default function ForexAnalyticsPage() {
               <button
                 key={period}
                 onClick={() => setSelectedFilter(period)}
-                className={`px-2 h-full rounded text-[10px] font-bold uppercase transition-all ${
+                className={`px-2 h-full rounded text-[10px] font-bold uppercase transition-all ₦{
                   selectedPeriod === period
                     ? "bg-primary text-on-primary shadow-sm"
                     : "text-on-surface-variant hover:text-on-surface"
@@ -71,8 +71,8 @@ export default function ForexAnalyticsPage() {
                     {sess.trades} Trades Logged
                   </span>
                 </div>
-                <span className={`text-body-md font-bold font-data-lg ${isProfit ? "text-tertiary" : "text-error"}`}>
-                  {isProfit ? "+" : ""}${sess.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <span className={`text-body-md font-bold font-data-lg ₦{isProfit ? "text-tertiary" : "text-error"}`}>
+                  {isProfit ? "+" : ""}₦{sess.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </span>
               </div>
             );
@@ -92,8 +92,8 @@ export default function ForexAnalyticsPage() {
               return (
                 <div key={strat.name} className="flex justify-between items-center px-4 py-4">
                   <span className="text-body-sm font-semibold text-on-surface">{strat.name}</span>
-                  <span className={`text-body-sm font-bold font-data-lg ${isProfit ? "text-tertiary" : "text-error"}`}>
-                    {isProfit ? "+" : ""}${strat.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  <span className={`text-body-sm font-bold font-data-lg ₦{isProfit ? "text-tertiary" : "text-error"}`}>
+                    {isProfit ? "+" : ""}₦{strat.p_l.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               );

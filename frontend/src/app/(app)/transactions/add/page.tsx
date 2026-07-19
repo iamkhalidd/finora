@@ -79,7 +79,7 @@ function AddTransactionForm() {
         <div className="flex flex-col items-center justify-center gap-1 my-2 bg-surface-container-lowest/40 p-4 rounded-2xl border border-white/5">
           <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Amount</span>
           <div className="flex items-center gap-1">
-            <span className="text-headline-lg font-bold text-outline">$</span>
+            <span className="text-headline-lg font-bold text-outline">₦</span>
             <input
               type="number"
               value={amount}
@@ -96,7 +96,7 @@ function AddTransactionForm() {
             <button
               key={t}
               onClick={() => setType(t)}
-              className={`flex-1 py-2.5 rounded-lg text-label-xs font-bold capitalize transition-all ${
+              className={`flex-1 py-2.5 rounded-lg text-label-xs font-bold capitalize transition-all ₦{
                 type === t
                   ? "bg-primary text-on-primary shadow-lg"
                   : "text-on-surface-variant hover:text-on-surface"
@@ -118,7 +118,7 @@ function AddTransactionForm() {
                 <button
                   key={cat.name}
                   onClick={() => setSelectedCategory(cat.name)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl min-w-[76px] snap-center border transition-all ${
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl min-w-[76px] snap-center border transition-all ₦{
                     isSel
                       ? "bg-primary/20 border-primary text-primary"
                       : "bg-surface-container border-white/5 text-on-surface-variant hover:text-on-surface"
