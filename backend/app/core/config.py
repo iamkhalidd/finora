@@ -1,4 +1,5 @@
 import os
+from typing import List
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -6,17 +7,16 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY", "SUPER_SECRET_KEY_FINORA_JOURNAL_PRO_2024")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
-
     POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "finora")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "finora")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "finora")
+    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
 
     @staticmethod
     def _normalize_database_url(url: str) -> str:
         if url.startswith("postgresql://"):
             url = "postgresql+asyncpg://" + url.removeprefix("postgresql://")
-        # asyncpg expects ssl=require; Neon often provides sslmode=require
         url = url.replace("sslmode=require", "ssl=require")
         url = url.replace("channel_binding=require&", "").replace("&channel_binding=require", "")
         return url
