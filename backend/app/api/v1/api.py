@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.app.api.v1.endpoints import auth, users, transactions, budgets, trades, dashboard, forex, news, alerts
+from app.api.v1.endpoints import auth, users, transactions, budgets, trades, dashboard, forex, news, alerts
 
 api_router = APIRouter()
 

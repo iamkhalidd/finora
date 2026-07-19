@@ -2,12 +2,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete, and_, func
-from backend.app.db.session import get_db
-from backend.app.api.v1.deps import get_current_user
-from backend.app.models.user import User
-from backend.app.models.budget import Budget
-from backend.app.models.transaction import Transaction
-from backend.app.schemas.budget import BudgetCreate, BudgetUpdate, Budget as BudgetSchema
+from app.db.session import get_db
+from app.api.v1.deps import get_current_user
+from app.models.user import User
+from app.models.budget import Budget
+from app.models.transaction import Transaction
+from app.schemas.budget import BudgetCreate, BudgetUpdate, Budget as BudgetSchema
 
 router = APIRouter()
 

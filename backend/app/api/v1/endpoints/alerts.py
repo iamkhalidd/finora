@@ -3,11 +3,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete, and_, update, func
-from backend.app.db.session import get_db
-from backend.app.api.v1.deps import get_current_user
-from backend.app.models.user import User
-from backend.app.models.alert import Alert
-from backend.app.schemas.alert import AlertSchema, AlertCreate, AlertUpdate
+from app.db.session import get_db
+from app.api.v1.deps import get_current_user
+from app.models.user import User
+from app.models.alert import Alert
+from app.schemas.alert import AlertSchema, AlertCreate, AlertUpdate
 
 router = APIRouter()
 

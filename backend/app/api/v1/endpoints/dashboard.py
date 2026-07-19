@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
-from backend.app.db.session import get_db
-from backend.app.api.v1.deps import get_current_user
-from backend.app.models.user import User
-from backend.app.models.transaction import Transaction
+from app.db.session import get_db
+from app.api.v1.deps import get_current_user
+from app.models.user import User
+from app.models.transaction import Transaction
 
 router = APIRouter()
 

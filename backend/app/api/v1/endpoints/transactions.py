@@ -3,12 +3,12 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete, and_, desc, func
-from backend.app.db.session import get_db
-from backend.app.api.v1.deps import get_current_user
-from backend.app.models.user import User
-from backend.app.models.transaction import Transaction
-from backend.app.models.budget import Budget
-from backend.app.schemas.transaction import TransactionCreate, TransactionUpdate, Transaction as TransactionSchema
+from app.db.session import get_db
+from app.api.v1.deps import get_current_user
+from app.models.user import User
+from app.models.transaction import Transaction
+from app.models.budget import Budget
+from app.schemas.transaction import TransactionCreate, TransactionUpdate, Transaction as TransactionSchema
 
 router = APIRouter()
 

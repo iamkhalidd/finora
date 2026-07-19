@@ -2,10 +2,10 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from backend.app.db.session import get_db
-from backend.app.models.user import User
-from backend.app.schemas.user import UserCreate, User as UserSchema
-from backend.app.core.security import get_password_hash, verify_password, create_access_token, create_refresh_token, decode_token
+from app.db.session import get_db
+from app.models.user import User
+from app.schemas.user import UserCreate, User as UserSchema
+from app.core.security import get_password_hash, verify_password, create_access_token, create_refresh_token, decode_token
 
 router = APIRouter()
 

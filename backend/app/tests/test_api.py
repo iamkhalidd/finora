@@ -1,6 +1,6 @@
 import pytest
 import httpx
-from backend.app.main import app
+from app.main import app
 
 # Mocking endpoint connectivity test using FastAPI app directly
 @pytest.mark.asyncio

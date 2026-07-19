@@ -2,10 +2,10 @@ from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status, Request
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.app.db.session import get_db
-from backend.app.core.config import settings
-from backend.app.core.security import decode_token
-from backend.app.models.user import User
+from app.db.session import get_db
+from app.core.config import settings
+from app.core.security import decode_token
+from app.models.user import User
 from sqlalchemy import select
 
 async def get_current_user(

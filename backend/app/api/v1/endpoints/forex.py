@@ -1,8 +1,8 @@
 import random
 from fastapi import APIRouter, Query, Depends
 from typing import List, Optional
-from backend.app.api.v1.deps import get_current_user
-from backend.app.models.user import User
+from app.api.v1.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
