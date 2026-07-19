@@ -12,8 +12,23 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "finora")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "finora")
 
+    @staticmethod
+    def _normalize_database_url(url: str) -> str:
+        if url.startswith("postgresql://"):
+            url = "postgresql+asyncpg://" + url.removeprefix("postgresql://")
+        # asyncpg expects ssl=require; Neon often provides sslmode=require
+        url = url.replace("sslmode=require", "ssl=require")
+        url = url.replace("channel_binding=require&", "").replace("&channel_binding=require", "")
+        return url
+
     @property
     def DATABASE_URL(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+        url = os.getenv("DATABASE_URL")
+        if url:
+            return self._normalize_database_url(url.strip())
+        return (
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
+        )
 
 settings = Settings()
