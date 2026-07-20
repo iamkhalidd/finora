@@ -1,5 +1,4 @@
 import os
-from typing import List
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -11,7 +10,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "finora")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "finora")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "finora")
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: str = "http://localhost:3000"
 
     @staticmethod
     def _normalize_database_url(url: str) -> str:
