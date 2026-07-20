@@ -6,10 +6,28 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import GlassCard from "@/components/ui/GlassCard";
 
+function getInitialColor(name: string): string {
+  const colors = [
+    "from-primary to-primary-container",
+    "from-tertiary to-tertiary-container",
+    "from-secondary to-secondary-container",
+    "from-purple-500 to-purple-800",
+  ];
+  const idx = name.charCodeAt(0) % colors.length;
+  return colors[idx];
+}
+
+const SETTINGS_ITEMS = [
+  { icon: "person",               label: "Personal Profile",      sub: "Edit name, email",          href: null },
+  { icon: "notifications_active", label: "Alert Preferences",     sub: "Gmail & broker sync",       href: "/alerts" },
+  { icon: "savings",              label: "Budget Limits",         sub: "Manage categories",          href: "/budgets" },
+  { icon: "monitoring",           label: "Trading Journal",       sub: "View forex history",        href: "/forex" },
+  { icon: "security",             label: "Security & Access",     sub: "Passwords & API keys",      href: null },
+];
+
 export default function AccountProfilePage() {
   const router = useRouter();
 
-  // Fetch current user details
   const { data: user } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -18,7 +36,6 @@ export default function AccountProfilePage() {
     },
   });
 
-  // Fetch statistics aggregation numbers
   const { data: stats, isLoading: isStatsLoading } = useQuery({
     queryKey: ["user-stats"],
     queryFn: async () => {
@@ -31,96 +48,124 @@ export default function AccountProfilePage() {
     try {
       await api.post("/api/v1/auth/logout");
     } catch (err) {
-      console.error("Failed backend logout call", err);
+      console.error("Backend logout error", err);
     } finally {
       localStorage.removeItem("accessToken");
       router.push("/login");
     }
   };
 
-  const username = user?.name ?? "Khalid";
-  const userEmail = user?.email ?? "trader.pro@gmail.com";
+  const username = user?.name ?? "Trader";
+  const userEmail = user?.email ?? "";
+  const userInitial = username.charAt(0).toUpperCase();
+  const gradientClass = getInitialColor(username);
+
+  const statItems = [
+    { label: "Transactions", value: stats?.transactions_count ?? 0, icon: "receipt_long" },
+    { label: "Budgets",      value: stats?.active_budgets ?? 0,     icon: "savings"       },
+    { label: "Trades",       value: stats?.total_trades ?? 0,       icon: "monitoring"    },
+  ];
 
   return (
-    <div className="flex flex-col gap-stack-lg px-container-padding pt-24 pb-safe w-full">
-      {/* Top Header bar */}
-      <header className="fixed top-0 left-0 right-0 max-w-md mx-auto z-40 bg-surface/80 backdrop-blur-xl flex justify-between items-center px-container-padding py-stack-sm border-b border-white/5">
-        <h1 className="text-headline-lg font-headline-lg text-on-surface font-bold">Profile</h1>
-        <button onClick={handleLogout} className="text-error hover:opacity-80 flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider p-2">
+    <div className="flex flex-col pb-28 w-full animate-fadeIn">
+      {/* ── Header ─────────────────────────────────────── */}
+      <header
+        className="fixed top-0 left-0 right-0 max-w-md mx-auto z-40 flex justify-between items-center px-container-padding py-3"
+        style={{
+          background: "linear-gradient(to bottom, rgba(7,19,37,0.98) 60%, rgba(7,19,37,0))",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
+      >
+        <h1 className="text-headline-lg font-bold text-on-surface">Profile</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 text-error text-[12px] font-bold uppercase tracking-wider hover:opacity-70 transition-opacity"
+        >
           <span className="material-symbols-outlined text-[18px]">logout</span>
           Logout
         </button>
       </header>
 
-      {/* User Avatar details glass banner card */}
-      <GlassCard className="flex flex-col items-center text-center gap-3">
-        <div className="w-20 h-20 rounded-full overflow-hidden bg-surface-container-highest border-2 border-primary/20 relative shadow-md">
-          <img
-            className="w-full h-full object-cover"
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-            alt="User avatar"
-          />
+      {/* ── Avatar Banner ──────────────────────────────── */}
+      <div
+        className="relative flex flex-col items-center pt-[88px] pb-8 px-container-padding"
+        style={{
+          background: "linear-gradient(180deg, rgba(155,202,255,0.08) 0%, rgba(7,19,37,0) 100%)",
+        }}
+      >
+        {/* Initials Avatar */}
+        <div
+          className={`w-24 h-24 rounded-full flex items-center justify-center text-[36px] font-black bg-gradient-to-br ${gradientClass} text-on-primary shadow-glow-primary border-4 border-background mb-4`}
+        >
+          {userInitial}
         </div>
-        <div className="flex flex-col">
-          <h2 className="text-headline-sm font-bold text-on-surface">{username}</h2>
-          <span className="text-[11px] text-outline font-semibold uppercase mt-0.5 tracking-wider">
-            Premium Journal Member
-          </span>
-          <span className="text-[10px] text-outline-variant mt-0.5">{userEmail}</span>
-        </div>
-      </GlassCard>
 
-      {/* Numerical Stats overview */}
-      <section className="grid grid-cols-3 gap-3">
-        <div className="glass-card glass-edge p-4 rounded-xl flex flex-col items-center justify-center text-center gap-1 bg-surface-container/40">
-          <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Logs</span>
-          <span className="text-lg font-bold font-data-lg text-on-surface">
-            {isStatsLoading ? "..." : stats?.transactions_count ?? 0}
-          </span>
-        </div>
-        <div className="glass-card glass-edge p-4 rounded-xl flex flex-col items-center justify-center text-center gap-1 bg-surface-container/40">
-          <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Limits</span>
-          <span className="text-lg font-bold font-data-lg text-on-surface">
-            {isStatsLoading ? "..." : stats?.active_budgets ?? 0}
-          </span>
-        </div>
-        <div className="glass-card glass-edge p-4 rounded-xl flex flex-col items-center justify-center text-center gap-1 bg-surface-container/40">
-          <span className="text-[10px] font-bold text-outline uppercase tracking-wider">Trades</span>
-          <span className="text-lg font-bold font-data-lg text-on-surface">
-            {isStatsLoading ? "..." : stats?.total_trades ?? 0}
-          </span>
-        </div>
-      </section>
+        <h2 className="text-headline-lg font-black text-on-surface">{username}</h2>
+        <span className="text-[11px] font-bold text-outline uppercase tracking-widest mt-0.5">
+          Premium Journal Member
+        </span>
+        {userEmail && (
+          <span className="text-[12px] text-on-surface-variant mt-1">{userEmail}</span>
+        )}
+      </div>
 
-      {/* Interactive Account options / settings links */}
-      <section className="flex flex-col gap-2.5">
-        <h3 className="text-headline-sm font-headline-sm text-on-surface">Journal Settings</h3>
-        <div className="flex flex-col bg-surface-container/30 border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
-          <div className="flex justify-between items-center px-4 py-4 hover:bg-white/[0.02] cursor-pointer">
-            <div className="flex items-center gap-3 text-on-surface">
-              <span className="material-symbols-outlined text-[20px] text-primary">person</span>
-              <span className="text-body-sm font-semibold">Personal Profile</span>
+      <div className="flex flex-col gap-5 px-container-padding">
+        {/* ── Stats Row ────────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-3">
+          {statItems.map((stat) => (
+            <div
+              key={stat.label}
+              className="glass-card glass-edge rounded-2xl p-4 flex flex-col items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[20px] text-outline">
+                {stat.icon}
+              </span>
+              <span className="font-mono text-[22px] font-black text-on-surface">
+                {isStatsLoading ? "—" : stat.value}
+              </span>
+              <span className="text-[10px] font-bold text-outline uppercase tracking-wider text-center">
+                {stat.label}
+              </span>
             </div>
-            <span className="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
-          </div>
+          ))}
+        </div>
 
-          <div className="flex justify-between items-center px-4 py-4 hover:bg-white/[0.02] cursor-pointer" onClick={() => router.push("/alerts")}>
-            <div className="flex items-center gap-3 text-on-surface">
-              <span className="material-symbols-outlined text-[20px] text-primary">notifications_active</span>
-              <span className="text-body-sm font-semibold">Linked Services Sync</span>
-            </div>
-            <span className="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
-          </div>
-
-          <div className="flex justify-between items-center px-4 py-4 hover:bg-white/[0.02] cursor-pointer">
-            <div className="flex items-center gap-3 text-on-surface">
-              <span className="material-symbols-outlined text-[20px] text-primary">security</span>
-              <span className="text-body-sm font-semibold">Security & Access Keys</span>
-            </div>
-            <span className="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+        {/* ── Settings List ─────────────────────────────── */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-headline-sm font-bold text-on-surface">Settings</h3>
+          <div className="flex flex-col bg-surface-container/30 border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
+            {SETTINGS_ITEMS.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => item.href && router.push(item.href)}
+                className="flex justify-between items-center px-4 py-4 hover:bg-white/[0.03] transition-colors text-left w-full"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[18px] text-primary">{item.icon}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-body-sm font-semibold text-on-surface">{item.label}</span>
+                    <span className="text-[11px] text-outline">{item.sub}</span>
+                  </div>
+                </div>
+                <span className="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+              </button>
+            ))}
           </div>
         </div>
-      </section>
+
+        {/* ── Danger Zone ────────────────────────────────── */}
+        <button
+          onClick={handleLogout}
+          className="w-full py-4 rounded-2xl border border-error/20 text-error font-bold text-body-sm flex items-center justify-center gap-2 hover:bg-error/8 transition-colors"
+          style={{ backgroundColor: "rgba(255,180,171,0.04)" }}
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          Sign Out of Finora
+        </button>
+      </div>
     </div>
   );
 }

@@ -104,6 +104,8 @@ export default function AddTradePage() {
     }
   };
 
+  const isBuy = direction === "BUY";
+
   return (
     <div className="min-h-screen bg-background">
       <div className="px-container-padding pt-24 pb-safe opacity-40">
@@ -111,11 +113,11 @@ export default function AddTradePage() {
       </div>
 
       <BottomSheet isOpen={isOpen} onClose={handleClose}>
-        <div className="flex flex-col gap-4 pt-1">
-          <h2 className="text-headline-sm font-headline-sm text-on-surface">Log Trade Position</h2>
+        <div className="flex flex-col gap-4 pt-1 animate-fadeIn">
+          <h2 className="text-headline-sm font-bold text-on-surface">Log Trade Position</h2>
 
           {error && (
-            <div className="bg-error/10 border border-error/20 p-3 rounded-lg text-error text-body-sm">
+            <div className="bg-error/10 border border-error/20 p-3 rounded-xl text-error text-body-sm">
               {error}
             </div>
           )}
@@ -131,7 +133,7 @@ export default function AddTradePage() {
                 value={pair}
                 onChange={(e) => setPair(e.target.value)}
                 placeholder="XAUUSD"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-3 py-3 text-body-md text-on-surface focus:outline-none focus:border-primary uppercase font-bold"
+                className="input-base uppercase font-bold text-center"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -143,12 +145,12 @@ export default function AddTradePage() {
                   <button
                     key={dir}
                     onClick={() => setDirection(dir)}
-                    className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ₦{
+                    className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ${
                       direction === dir
                         ? dir === "BUY"
-                          ? "bg-tertiary text-on-tertiary shadow-md"
-                          : "bg-error text-on-error shadow-md"
-                        : "text-on-surface-variant"
+                          ? "bg-tertiary text-background shadow-glow-tertiary"
+                          : "bg-error text-background shadow-glow-error"
+                        : "text-outline hover:text-on-surface-variant"
                     }`}
                   >
                     {dir}
@@ -170,7 +172,7 @@ export default function AddTradePage() {
                 value={entryPrice}
                 onChange={(e) => setEntryPrice(e.target.value)}
                 placeholder="1982.40"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-2.5 py-3 text-body-sm text-on-surface focus:outline-none focus:border-primary font-data-lg"
+                className="input-base font-mono text-center px-1"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -183,7 +185,7 @@ export default function AddTradePage() {
                 value={exitPrice}
                 onChange={(e) => setExitPrice(e.target.value)}
                 placeholder="Optional"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-2.5 py-3 text-body-sm text-on-surface focus:outline-none focus:border-primary font-data-lg"
+                className="input-base font-mono text-center px-1"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -196,7 +198,7 @@ export default function AddTradePage() {
                 value={lotSize}
                 onChange={(e) => setLotSize(e.target.value)}
                 placeholder="0.10"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-2.5 py-3 text-body-sm text-on-surface focus:outline-none focus:border-primary font-data-lg"
+                className="input-base font-mono text-center px-1"
               />
             </div>
           </div>
@@ -213,7 +215,7 @@ export default function AddTradePage() {
                 value={stopLoss}
                 onChange={(e) => setStopLoss(e.target.value)}
                 placeholder="1975.00"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-3 py-3 text-body-sm text-on-surface focus:outline-none font-data-lg"
+                className="input-base font-mono text-center"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -226,7 +228,7 @@ export default function AddTradePage() {
                 value={takeProfit}
                 onChange={(e) => setTakeProfit(e.target.value)}
                 placeholder="1995.00"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-3 py-3 text-body-sm text-on-surface focus:outline-none font-data-lg"
+                className="input-base font-mono text-center"
               />
             </div>
           </div>
@@ -241,10 +243,10 @@ export default function AddTradePage() {
                 <button
                   key={s}
                   onClick={() => setSession(s)}
-                  className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ₦{
+                  className={`flex-1 h-full rounded-lg text-[11px] font-bold transition-all ${
                     session === s
-                      ? "bg-primary text-on-primary shadow-md"
-                      : "text-on-surface-variant"
+                      ? "bg-primary text-on-primary shadow-glow-primary"
+                      : "text-outline hover:text-on-surface-variant"
                   }`}
                 >
                   {s}
@@ -264,7 +266,7 @@ export default function AddTradePage() {
                 value={strategy}
                 onChange={(e) => setStrategy(e.target.value)}
                 placeholder="Order Block"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-3 py-3 text-body-sm text-on-surface focus:outline-none"
+                className="input-base"
               />
             </div>
             <div className="flex flex-col gap-1">
@@ -276,17 +278,17 @@ export default function AddTradePage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Trendline support"
-                className="w-full bg-surface-container border border-white/5 rounded-xl px-3 py-3 text-body-sm text-on-surface focus:outline-none"
+                className="input-base"
               />
             </div>
           </div>
 
           {/* Realtime estimated P&L calculator banner */}
-          <div className="flex justify-between items-center bg-surface-container-highest/50 border border-white/10 px-4 py-3.5 rounded-xl mt-1">
-            <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+          <div className="flex justify-between items-center bg-surface-container-low border border-white/5 px-4 py-3.5 rounded-xl mt-1">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
               Estimated P&L
             </span>
-            <span className={`text-[15px] font-bold font-data-lg ₦{estimatedPL >= 0 ? "text-tertiary" : "text-error"}`}>
+            <span className={`text-[15px] font-bold font-mono ${estimatedPL >= 0 ? "text-tertiary" : "text-error"}`}>
               {estimatedPL >= 0 ? "+" : ""}₦{estimatedPL.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
@@ -294,7 +296,11 @@ export default function AddTradePage() {
           <button
             onClick={handleSave}
             disabled={isCreating}
-            className="w-full bg-primary hover:bg-primary-container text-on-primary font-bold py-4 rounded-xl mt-2 transition-all shadow-lg"
+            className={`w-full font-bold py-4 rounded-xl mt-2 transition-all disabled:opacity-50 text-body-sm active:scale-[0.98] ${
+              isBuy
+                ? "bg-tertiary text-background shadow-glow-tertiary"
+                : "bg-error text-background shadow-glow-error"
+            }`}
           >
             {isCreating ? "Saving journal entry..." : "Save Trade Entry"}
           </button>

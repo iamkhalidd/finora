@@ -55,40 +55,86 @@ const config: Config = {
         "on-secondary-fixed-variant": "#2d486d",
         "tertiary": "#49df9b",
         "surface-bright": "#2e394d",
-        "surface": "#071325"
+        "surface": "#071325",
+        // Semantic helpers
+        "income": "#49df9b",
+        "expense": "#ffb4ab",
       },
       borderRadius: {
         "DEFAULT": "0.25rem",
         "lg": "0.5rem",
         "xl": "0.75rem",
-        "full": "9999px"
+        "2xl": "1rem",
+        "3xl": "1.5rem",
+        "full": "9999px",
       },
       spacing: {
         "stack-sm": "8px",
+        "stack-md": "16px",
         "stack-lg": "24px",
+        "stack-xl": "32px",
         "gutter": "16px",
         "container-padding": "20px",
         "unit": "4px",
-        "stack-md": "16px"
       },
       fontFamily: {
-        "data-lg": ["JetBrains Mono"],
-        "label-xs": ["Manrope"],
-        "body-sm": ["Manrope"],
-        "headline-sm": ["Manrope"],
-        "body-md": ["Manrope"],
-        "display-lg": ["Manrope"],
-        "headline-lg": ["Manrope"]
+        // Map font-sans to Manrope so body font works
+        "sans": ["Manrope", "system-ui", "sans-serif"],
+        "mono": ["JetBrains Mono", "monospace"],
+        // Legacy tokens kept for compatibility
+        "data-lg": ["JetBrains Mono", "monospace"],
+        "label-xs": ["Manrope", "sans-serif"],
+        "body-sm": ["Manrope", "sans-serif"],
+        "headline-sm": ["Manrope", "sans-serif"],
+        "body-md": ["Manrope", "sans-serif"],
+        "display-lg": ["Manrope", "sans-serif"],
+        "headline-lg": ["Manrope", "sans-serif"],
       },
       fontSize: {
-        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
-        "label-xs": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
-        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
-        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
-        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
-      }
+        "data-lg": ["18px", { lineHeight: "24px", fontWeight: "500" }],
+        "label-xs": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+        "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+        "display-sm": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+      },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "-400px 0" },
+          "100%": { backgroundPosition: "400px 0" },
+        },
+        fadeInUp: {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.4s linear infinite",
+        "fade-in-up": "fadeInUp 0.4s ease both",
+        "fade-in": "fadeIn 0.3s ease both",
+        "scale-in": "scaleIn 0.25s ease both",
+      },
+      boxShadow: {
+        "glow-primary": "0 0 20px rgba(155, 202, 255, 0.25)",
+        "glow-tertiary": "0 0 20px rgba(73, 223, 155, 0.2)",
+        "glow-error": "0 0 20px rgba(255, 180, 171, 0.2)",
+        "card": "0 4px 24px rgba(0,0,0,0.3)",
+        "nav": "0 -4px 32px rgba(0,0,0,0.4)",
+      },
     },
   },
   plugins: [],
