@@ -7,6 +7,7 @@ import { useTransactions } from "@/hooks/useTransactions";
 const CATEGORIES = [
   { name: "Salary",           icon: "payments"     },
   { name: "Trading Profit",   icon: "show_chart"   },
+  { name: "Savings",          icon: "savings"      },
   { name: "Food & Dining",    icon: "restaurant"   },
   { name: "Rent & Housing",   icon: "home"         },
   { name: "Subscriptions",    icon: "subscriptions"},

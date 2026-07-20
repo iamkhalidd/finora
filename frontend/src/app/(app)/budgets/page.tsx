@@ -10,6 +10,7 @@ import EmptyState from "@/components/ui/EmptyState";
 const CATEGORIES_ICONS: { [key: string]: string } = {
   "Salary":         "payments",
   "Trading Profit": "show_chart",
+  "Savings":        "savings",
   "Food & Dining":  "restaurant",
   "Rent & Housing": "home",
   "Subscriptions":  "subscriptions",
