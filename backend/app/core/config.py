@@ -10,7 +10,15 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "finora")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "finora")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "finora")
+    # Comma-separated list, e.g. "https://finora.vercel.app,http://localhost:3000"
     CORS_ORIGINS: str = "http://localhost:3000"
+    # Set to true in production (HTTPS). Cross-site cookies (frontend and API on
+    # different domains) are only sent by browsers when Secure + SameSite=None.
+    COOKIE_SECURE: bool = False
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
     @staticmethod
     def _normalize_database_url(url: str) -> str:

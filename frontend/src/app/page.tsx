@@ -2,22 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/lib/auth";
 
 export default function RootIndex() {
   const router = useRouter();
-
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      router.push("/dashboard");
-    } else {
-      router.push("/login");
-    }
+    router.replace(getAccessToken() ? "/dashboard" : "/login");
   }, [router]);
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center text-outline">
-      Directing session...
-    </div>
-  );
+  return null;
 }

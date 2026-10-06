@@ -1,13 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from app.db.session import get_db
 from app.api.v1.deps import get_current_user
+from app.core.security import get_password_hash, verify_password
 from app.models.user import User
-from app.models.transaction import Transaction
-from app.models.budget import Budget
-from app.models.trade import Trade
-from app.schemas.user import User as UserSchema
+from app.schemas.user import User as UserSchema, UserUpdate, PasswordChange
 
 router = APIRouter()
 
@@ -15,31 +12,30 @@ router = APIRouter()
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.get("/me/stats")
-async def get_me_stats(
+@router.put("/me", response_model=UserSchema)
+async def update_me(
+    user_in: UserUpdate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Total Transactions count
-    tx_count_result = await db.execute(
-        select(func.count(Transaction.id)).where(Transaction.user_id == current_user.id)
-    )
-    tx_count = tx_count_result.scalar() or 0
+    current_user.name = user_in.name.strip()
+    db.add(current_user)
+    await db.flush()
+    await db.refresh(current_user)
+    return current_user
 
-    # Total Budgets count
-    budget_count_result = await db.execute(
-        select(func.count(Budget.id)).where(Budget.user_id == current_user.id)
-    )
-    budget_count = budget_count_result.scalar() or 0
-
-    # Total Trades count
-    trade_count_result = await db.execute(
-        select(func.count(Trade.id)).where(Trade.user_id == current_user.id)
-    )
-    trade_count = trade_count_result.scalar() or 0
-
-    return {
-        "transactions_count": tx_count,
-        "active_budgets": budget_count,
-        "total_trades": trade_count
-    }
+@router.post("/me/password")
+async def change_password(
+    payload: PasswordChange,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    current_user.hashed_password = get_password_hash(payload.new_password)
+    db.add(current_user)
+    await db.flush()
+    return {"detail": "Password updated"}

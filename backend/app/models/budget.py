@@ -7,7 +7,9 @@ class Budget(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     category = Column(String, nullable=False)
-    limit = Column(Float, nullable=False)
+    limit = Column(Float, nullable=False)  # monthly limit in NGN
+    # Legacy column: spending is now computed per month from transactions.
+    # Kept so existing databases don't need a migration.
     spent = Column(Float, default=0.0, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 

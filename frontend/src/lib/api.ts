@@ -1,83 +1,41 @@
-import axios from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { getAccessToken, setAccessToken, removeAccessToken } from "./auth";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const baseURL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
 
-export const api = axios.create({
-  baseURL,
-  withCredentials: true,
+export const api = axios.create({ baseURL, withCredentials: true, timeout: 20000 });
+
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
-api.interceptors.request.use(
-  (config) => {
-    let token = "";
-    if (typeof window !== "undefined") {
-      token = localStorage.getItem("accessToken") || "";
-    }
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
+// One shared refresh request, so parallel 401s don't each trigger a refresh.
+let refreshing: Promise<string> | null = null;
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const refreshResponse = await axios.post(
-          `${baseURL}/api/v1/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const { access_token } = refreshResponse.data;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", access_token);
-        }
-        api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-        processQueue(null, access_token);
-        isRefreshing = false;
-        return api(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        isRefreshing = false;
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
-          window.location.href = "/login";
-        }
-        return Promise.reject(refreshError);
-      }
+  async (error: AxiosError) => {
+    const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const isAuthCall = original?.url?.startsWith("/auth/");
+    if (error.response?.status !== 401 || !original || original._retry || isAuthCall) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+    original._retry = true;
+    try {
+      refreshing ??= axios
+        .post(`${baseURL}/auth/refresh`, {}, { withCredentials: true })
+        .then((res) => res.data.access_token as string)
+        .finally(() => { refreshing = null; });
+      const token = await refreshing;
+      setAccessToken(token);
+      original.headers.Authorization = `Bearer ${token}`;
+      return api(original);
+    } catch (refreshError) {
+      removeAccessToken();
+      if (typeof window !== "undefined") window.location.href = "/login";
+      return Promise.reject(refreshError);
+    }
   }
 );

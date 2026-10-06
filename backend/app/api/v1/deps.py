@@ -1,52 +1,34 @@
-from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status, Request
-from jose import jwt
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.core.config import settings
 from app.core.security import decode_token
 from app.models.user import User
-from sqlalchemy import select
 
 async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    # Check Authorization header first
+    # Check Authorization header first, then the HTTPOnly cookie
     authorization = request.headers.get("Authorization")
     token = None
     if authorization and authorization.startswith("Bearer "):
         token = authorization.split(" ")[1]
-
-    # If not in header, try checking HTTPOnly cookies
     if not token:
         token = request.cookies.get("accessToken")
 
     if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
     payload = decode_token(token)
-    if not payload or payload.get("type") != "access":
+    if not payload or payload.get("type") != "access" or not payload.get("sub"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials or token expired",
         )
 
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token invalid",
-        )
-
-    result = await db.execute(select(User).where(User.id == int(user_id)))
+    result = await db.execute(select(User).where(User.id == int(payload["sub"])))
     user = result.scalar_one_or_none()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user

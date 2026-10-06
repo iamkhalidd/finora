@@ -17,7 +17,7 @@ class Trade(Base):
     session = Column(String, nullable=False)        # "London", "New York", "Asian"
     strategy = Column(String, nullable=True)
     notes = Column(String, nullable=True)
-    p_l = Column(Float, default=0.0, nullable=False) # profit/loss calculated
+    p_l = Column(Float, default=0.0, nullable=False) # profit/loss in account currency (USD)
     date = Column(DateTime, default=datetime.utcnow, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 

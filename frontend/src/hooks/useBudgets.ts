@@ -1,49 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import type { Budget } from "@/lib/types";
 
-export interface BudgetPayload {
-  category: string;
-  limit: number;
+export function useBudgets(month: string) {
+  return useQuery({
+    queryKey: ["budgets", month],
+    queryFn: async () => (await api.get<Budget[]>("/budgets/", { params: { month } })).data,
+  });
 }
 
-export function useBudgets() {
+export function useBudgetMutations(month: string) {
   const queryClient = useQueryClient();
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["budgets"] });
 
-  const budgetsQuery = useQuery({
-    queryKey: ["budgets"],
-    queryFn: async () => {
-      const response = await api.get("/api/v1/budgets");
-      return response.data;
-    },
+  const create = useMutation({
+    mutationFn: async (payload: { category: string; limit: number }) =>
+      (await api.post<Budget>("/budgets/", payload, { params: { month } })).data,
+    onSuccess: invalidate,
+  });
+  const update = useMutation({
+    mutationFn: async ({ id, limit }: { id: number; limit: number }) =>
+      (await api.put<Budget>(`/budgets/${id}`, { limit }, { params: { month } })).data,
+    onSuccess: invalidate,
+  });
+  const remove = useMutation({
+    mutationFn: async (id: number) => (await api.delete(`/budgets/${id}`)).data,
+    onSuccess: invalidate,
   });
 
-  const createMutation = useMutation({
-    mutationFn: async (payload: BudgetPayload) => {
-      const response = await api.post("/api/v1/budgets", payload);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await api.delete(`/api/v1/budgets/${id}`);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budgets"] });
-      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
-    },
-  });
-
-  return {
-    budgets: budgetsQuery.data || [],
-    isLoading: budgetsQuery.isLoading,
-    createBudget: createMutation.mutateAsync,
-    isCreating: createMutation.isPending,
-    deleteBudget: deleteMutation.mutateAsync,
-  };
+  return { create, update, remove };
 }
