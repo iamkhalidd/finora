@@ -1,233 +1,204 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useTransactions } from "@/hooks/useTransactions";
-import { useStore } from "@/hooks/useStore";
-import GlassCard from "@/components/ui/GlassCard";
-import DonutChart from "@/components/charts/DonutChart";
-import { SkeletonHeroCard, SkeletonRow, SkeletonStatCard } from "@/components/ui/SkeletonLoader";
-import EmptyState from "@/components/ui/EmptyState";
+import Icon from "@/components/ui/Icon";
+import PageHeader, { HeaderButton } from "@/components/ui/PageHeader";
+import { EmptyState, ErrorState, Skeleton, SkeletonRows } from "@/components/ui/States";
+import CategoryBars from "@/components/charts/CategoryBars";
+import TransactionRow from "@/components/TransactionRow";
+import { useProfile } from "@/hooks/useProfile";
+import { useSummary, useTransactions } from "@/hooks/useTransactions";
+import { useBudgets } from "@/hooks/useBudgets";
+import { useTradeStats } from "@/hooks/useTrades";
+import { currentMonth, daysLeftInMonth, monthLabel, naira, usd } from "@/lib/format";
 
-function getGreeting() {
+function greeting() {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";
 }
 
+function SectionTitle({ title, href, linkLabel = "See all" }: { title: string; href?: string; linkLabel?: string }) {
+  return (
+    <div className="flex items-center justify-between mb-2.5 px-1">
+      <h2 className="font-extrabold">{title}</h2>
+      {href && (
+        <Link href={href} className="text-[13px] font-bold text-primary flex items-center">
+          {linkLabel} <Icon name="chevron_right" size={18} />
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
-  const notificationCount = useStore((state) => state.notificationCount);
-  const { transactions, summary: txSummary, isLoading: isTxLoading } = useTransactions({ limit: 4 });
+  const month = currentMonth();
+  const { data: user } = useProfile();
+  const summary = useSummary(month);
+  const recent = useTransactions({ limit: 5 });
+  const budgets = useBudgets(month);
+  const stats = useTradeStats();
 
-  const { data: dashboardSummary, isLoading: isDashboardLoading } = useQuery({
-    queryKey: ["dashboard-summary"],
-    queryFn: async () => {
-      const response = await api.get("/api/v1/dashboard/summary");
-      return response.data;
-    },
-  });
-
-  const { data: userProfile } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: async () => {
-      const response = await api.get("/api/v1/users/me");
-      return response.data;
-    },
-  });
-
-  const totalBalance = dashboardSummary?.total_balance ?? 0.0;
-  const totalIncome = dashboardSummary?.total_income ?? 0.0;
-  const totalExpenses = dashboardSummary?.total_expenses ?? 0.0;
-  const userName = userProfile?.name ?? "Trader";
-  const userInitial = userName.charAt(0).toUpperCase();
+  const s = summary.data;
+  const firstName = user?.name.split(" ")[0];
+  const watch = (budgets.data ?? [])
+    .map((b) => ({ ...b, pct: b.limit ? (b.spent / b.limit) * 100 : 0 }))
+    .filter((b) => b.pct >= 80)
+    .sort((a, b) => b.pct - a.pct);
+  const hasTrades = !!stats.data && stats.data.total_trades + stats.data.open_trades > 0;
 
   return (
-    <div className="flex flex-col gap-5 px-container-padding pt-[76px] pb-28 w-full animate-fadeIn">
-      {/* ── Header ─────────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 max-w-md mx-auto z-40 flex justify-between items-center px-container-padding py-3"
-        style={{
-          background: "linear-gradient(to bottom, rgba(7,19,37,0.98) 60%, rgba(7,19,37,0))",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-        }}
-      >
-        <div className="flex flex-col">
-          <span className="text-[11px] font-semibold text-outline uppercase tracking-widest">
-            {getGreeting()},
-          </span>
-          <span className="text-headline-sm font-bold text-primary tracking-tight leading-tight">
-            {userName}
-          </span>
-        </div>
+    <>
+      <PageHeader
+        subtitle={greeting() + (firstName ? "," : "")}
+        title={firstName ?? "Welcome"}
+        right={<HeaderButton icon="add" label="Add transaction" onClick={() => router.push("/transactions/new")} />}
+      />
 
-        <div className="flex items-center gap-2">
-          {/* Notifications bell */}
-          <Link href="/alerts" className="relative w-10 h-10 flex items-center justify-center rounded-full bg-surface-container border border-white/5 hover:border-primary/30 transition-all">
-            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">notifications</span>
-            {notificationCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-background animate-pulse" />
+      <div className="px-4 flex flex-col gap-6 pb-4">
+        {/* ── This month ─────────────────────────────── */}
+        {summary.isError ? (
+          <ErrorState onRetry={() => summary.refetch()} />
+        ) : (
+          <section className="card p-5 bg-gradient-to-br from-primary/[0.12] to-transparent">
+            <p className="text-sm text-muted font-semibold">{monthLabel(month)}</p>
+            {!s ? (
+              <Skeleton className="h-10 w-48 mt-2" />
+            ) : (
+              <>
+                <p className={`text-[34px] font-extrabold tabular-nums leading-tight mt-1 ${s.net < 0 ? "text-expense" : ""}`}>
+                  {naira(Math.abs(s.net))}
+                </p>
+                <p className="text-sm text-muted">
+                  {s.total_income === 0 && s.total_expenses === 0
+                    ? "Nothing logged yet this month"
+                    : s.net >= 0 ? "left over after spending" : "more spent than earned"}
+                </p>
+              </>
             )}
-          </Link>
-
-          {/* Avatar / account link */}
-          <Link href="/account"
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-container text-on-primary text-[15px] font-black border border-primary/20 shadow-glow-primary"
-          >
-            {userInitial}
-          </Link>
-        </div>
-      </header>
-
-      {/* ── Hero Balance Card ───────────────────────────── */}
-      {isDashboardLoading ? (
-        <SkeletonHeroCard />
-      ) : (
-        <GlassCard primary className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
-          <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest z-10 relative">
-            Total Balance
-          </p>
-          <h1 className="font-mono text-[38px] font-bold text-on-surface z-10 relative mt-1 leading-none tracking-tight">
-            ₦{totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </h1>
-          <div className="flex gap-2.5 mt-4 z-10 relative">
-            <div className="bg-tertiary/10 border border-tertiary/25 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[13px] text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_upward</span>
-              <span className="text-[12px] font-bold text-tertiary font-mono">
-                +₦{totalIncome.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-              </span>
-              <span className="text-[10px] text-tertiary/60 font-semibold">income</span>
-            </div>
-            <div className="bg-error/10 border border-error/25 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[13px] text-error" style={{ fontVariationSettings: "'FILL' 1" }}>arrow_downward</span>
-              <span className="text-[12px] font-bold text-error font-mono">
-                -₦{totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-              </span>
-              <span className="text-[10px] text-error/60 font-semibold">spent</span>
-            </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* ── Quick Actions ──────────────────────────────── */}
-      <section className="grid grid-cols-2 gap-3 animate-fade-in-up" style={{ animationDelay: "60ms" }}>
-        <button
-          onClick={() => router.push("/transactions/add?type=income")}
-          className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl border border-tertiary/20 bg-tertiary/8 text-tertiary font-bold text-body-sm transition-all hover:bg-tertiary/15 active:scale-95 shadow-md"
-          style={{ backgroundColor: "rgba(73,223,155,0.07)" }}
-        >
-          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
-          Add Income
-        </button>
-        <button
-          onClick={() => router.push("/transactions/add?type=expense")}
-          className="flex items-center justify-center gap-2 py-4 px-4 rounded-2xl border border-error/20 text-error font-bold text-body-sm transition-all hover:bg-error/10 active:scale-95 shadow-md"
-          style={{ backgroundColor: "rgba(255,180,171,0.07)" }}
-        >
-          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>remove_circle</span>
-          Add Expense
-        </button>
-      </section>
-
-      {/* ── Spending Donut ─────────────────────────────── */}
-      <GlassCard className="flex flex-col gap-4 animate-fade-in-up" style={{ animationDelay: "120ms" }}>
-        <div className="flex justify-between items-center">
-          <h2 className="text-headline-sm font-bold text-on-surface">Monthly Spending</h2>
-          <span className="text-[10px] font-bold text-outline bg-surface-container px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/5">
-            This Month
-          </span>
-        </div>
-
-        <DonutChart
-          data={txSummary.categories}
-          centerLabel="Total Spent"
-          centerValue={`₦${totalExpenses.toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
-        />
-
-        {/* Legend */}
-        <div className="flex flex-col gap-2.5 mt-1">
-          {txSummary.categories.slice(0, 4).map((cat: any, index: number) => {
-            const colors = ["#9bcaff", "#adc8f5", "#49df9b", "#ffb4ab", "#5ba3e8"];
-            return (
-              <div key={cat.name} className="flex justify-between items-center">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[index % colors.length] }} />
-                  <span className="text-body-sm text-on-surface-variant">{cat.name}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-body-sm text-on-surface font-bold font-mono">
-                    ₦{cat.value.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-                  </span>
-                  <span className="text-[11px] text-outline font-bold w-8 text-right">{cat.percentage}%</span>
-                </div>
+            <div className="grid grid-cols-2 gap-3 mt-5">
+              <div className="rounded-xl bg-bg/50 px-3.5 py-3">
+                <p className="text-xs text-muted font-semibold flex items-center gap-1">
+                  <Icon name="south_west" size={14} className="text-income" /> Money in
+                </p>
+                <p className="font-bold tabular-nums mt-0.5">{s ? naira(s.total_income) : "—"}</p>
               </div>
-            );
-          })}
-        </div>
-      </GlassCard>
+              <div className="rounded-xl bg-bg/50 px-3.5 py-3">
+                <p className="text-xs text-muted font-semibold flex items-center gap-1">
+                  <Icon name="north_east" size={14} className="text-expense" /> Money out
+                </p>
+                <p className="font-bold tabular-nums mt-0.5">{s ? naira(s.total_expenses) : "—"}</p>
+              </div>
+            </div>
+          </section>
+        )}
 
-      {/* ── Recent Transactions ────────────────────────── */}
-      <section className="flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: "180ms" }}>
-        <div className="flex justify-between items-center">
-          <h2 className="text-headline-sm font-bold text-on-surface">Recent Transactions</h2>
-          <Link href="/transactions" className="text-primary text-[11px] font-bold uppercase tracking-wider hover:opacity-70 transition-opacity flex items-center gap-0.5">
-            See All
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+        <div className="grid grid-cols-2 gap-3 -mt-2">
+          <Link href="/transactions/new?type=expense" className="btn-ghost py-3.5 text-sm">
+            <Icon name="remove" size={18} className="text-expense" /> Add expense
+          </Link>
+          <Link href="/transactions/new?type=income" className="btn-ghost py-3.5 text-sm">
+            <Icon name="add" size={18} className="text-income" /> Add income
           </Link>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {isTxLoading ? (
-            <>
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
-            </>
-          ) : transactions.length === 0 ? (
-            <EmptyState
-              icon="receipt_long"
-              title="No transactions yet"
-              description="Start tracking your money by adding your first transaction."
-              actionLabel="Add Transaction"
-              onAction={() => router.push("/transactions/add")}
-            />
-          ) : (
-            transactions.map((tx: any, i: number) => {
-              const isIncome = tx.type === "income";
-              return (
-                <div
-                  key={tx.id}
-                  className="stagger-item glass-card glass-edge rounded-xl p-4 flex items-center justify-between hover:border-white/15 transition-colors"
-                  style={{ animationDelay: `${i * 50}ms` }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                      isIncome ? "bg-tertiary/10 text-tertiary" : "bg-error/10 text-error"
-                    }`}>
-                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        {isIncome ? "arrow_downward" : "arrow_upward"}
-                      </span>
+        {/* ── Budget watch ───────────────────────────── */}
+        {budgets.data && budgets.data.length === 0 && (
+          <Link href="/budgets" className="card p-4 flex items-center gap-3 hover:bg-surface-2/50">
+            <div className="w-10 h-10 rounded-full bg-warn/10 text-warn flex items-center justify-center shrink-0">
+              <Icon name="pie_chart" size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">Set monthly budgets</p>
+              <p className="text-xs text-muted">Get warned before transport or food runs past its limit.</p>
+            </div>
+            <Icon name="chevron_right" size={20} className="text-muted" />
+          </Link>
+        )}
+        {watch.length > 0 && (
+          <section>
+            <SectionTitle title="Budget alerts" href="/budgets" linkLabel="Budgets" />
+            <div className="card divide-y divide-line">
+              {watch.map((b) => {
+                const over = b.pct >= 100;
+                return (
+                  <div key={b.id} className="flex items-center gap-3 px-4 py-3">
+                    <Icon name={over ? "error" : "warning"} size={20} className={over ? "text-expense" : "text-warn"} filled />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold truncate">{b.category}</p>
+                      <p className="text-xs text-muted">
+                        {over
+                          ? `${naira(b.spent - b.limit)} over your ${naira(b.limit)} limit`
+                          : `${naira(b.limit - b.spent)} left for ${daysLeftInMonth()} more day${daysLeftInMonth() === 1 ? "" : "s"}`}
+                      </p>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-body-sm font-bold text-on-surface">{tx.category}</span>
-                      <span className="text-[11px] text-outline font-medium">
-                        {new Date(tx.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </span>
-                    </div>
+                    <span className={`text-sm font-extrabold tabular-nums ${over ? "text-expense" : "text-warn"}`}>{Math.round(b.pct)}%</span>
                   </div>
-                  <span className={`font-mono text-[15px] font-bold ${isIncome ? "text-tertiary" : "text-error"}`}>
-                    {isIncome ? "+" : "-"}₦{tx.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ── Spending breakdown ─────────────────────── */}
+        {s && s.categories.length > 0 && (
+          <section>
+            <SectionTitle title="Where your money went" />
+            <div className="card p-4">
+              <CategoryBars categories={s.categories} limit={5} />
+            </div>
+          </section>
+        )}
+
+        {/* ── Recent ─────────────────────────────────── */}
+        <section>
+          <SectionTitle title="Recent transactions" href={recent.data?.length ? "/transactions" : undefined} />
+          {recent.isLoading ? (
+            <SkeletonRows count={3} />
+          ) : recent.isError ? (
+            <ErrorState onRetry={() => recent.refetch()} />
+          ) : recent.data!.length === 0 ? (
+            <div className="card">
+              <EmptyState
+                icon="receipt_long"
+                title="No transactions yet"
+                description="Log what you spend and earn. It takes about 5 seconds."
+                action={{ label: "Add your first one", onClick: () => router.push("/transactions/new") }}
+              />
+            </div>
+          ) : (
+            <div className="card divide-y divide-line overflow-hidden">
+              {recent.data!.map((tx) => <TransactionRow key={tx.id} tx={tx} showDate />)}
+            </div>
           )}
-        </div>
-      </section>
-    </div>
+        </section>
+
+        {/* ── Trading snapshot ───────────────────────── */}
+        {hasTrades && stats.data && (
+          <section>
+            <SectionTitle title="Trading" href="/trades" linkLabel="Journal" />
+            <Link href="/trades" className="card p-4 grid grid-cols-3 gap-2 hover:bg-surface-2/50">
+              <div>
+                <p className="text-xs text-muted font-semibold">Net P&L</p>
+                <p className={`font-extrabold tabular-nums ${stats.data.total_p_l >= 0 ? "text-income" : "text-expense"}`}>
+                  {usd(stats.data.total_p_l, { sign: true })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted font-semibold">Win rate</p>
+                <p className="font-extrabold tabular-nums">{stats.data.total_trades ? `${stats.data.win_rate}%` : "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted font-semibold">Open</p>
+                <p className="font-extrabold tabular-nums">{stats.data.open_trades}</p>
+              </div>
+            </Link>
+          </section>
+        )}
+      </div>
+    </>
   );
 }

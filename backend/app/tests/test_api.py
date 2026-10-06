@@ -99,6 +99,7 @@ def test_pnl_estimates():
     assert estimate_pnl_usd("USDJPY", "BUY", 150.00, 151.00, 1) == pytest.approx(662.25, abs=0.01)
     assert estimate_pnl_usd("GBPJPY", "BUY", 190, 191, 1) is None
     assert estimate_pnl_usd("US30", "BUY", 40000, 40100, 1) is None
+    assert estimate_pnl_usd("BTCUSD", "BUY", 60000, 61000, 1) is None
 
 
 async def test_trade_lifecycle_and_stats(auth_client):
