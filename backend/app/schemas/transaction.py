@@ -1,25 +1,31 @@
-from typing import Optional
+from typing import Literal, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+TransactionType = Literal["income", "expense"]
+
 
 class TransactionBase(BaseModel):
-    amount: float
-    type: str  # "income" or "expense"
-    category: str
-    notes: Optional[str] = None
+    amount: float = Field(gt=0)
+    type: TransactionType
+    category: str = Field(min_length=1, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=200)
     date: Optional[datetime] = None
+
 
 class TransactionCreate(TransactionBase):
     pass
 
+
 class TransactionUpdate(BaseModel):
-    amount: Optional[float] = None
-    type: Optional[str] = None
-    category: Optional[str] = None
-    notes: Optional[str] = None
+    amount: Optional[float] = Field(default=None, gt=0)
+    type: Optional[TransactionType] = None
+    category: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    notes: Optional[str] = Field(default=None, max_length=200)
     date: Optional[datetime] = None
 
-class TransactionInDBBase(TransactionBase):
+
+class Transaction(TransactionBase):
     id: int
     user_id: int
     date: datetime
@@ -27,10 +33,16 @@ class TransactionInDBBase(TransactionBase):
     class Config:
         from_attributes = True
 
-class Transaction(TransactionInDBBase):
-    pass
+
+class CategoryTotal(BaseModel):
+    name: str
+    value: float
+    percentage: float
+
 
 class TransactionSummary(BaseModel):
-    total_balance: float
+    month: str
     total_income: float
     total_expenses: float
+    net: float
+    categories: list[CategoryTotal]

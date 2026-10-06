@@ -13,3 +13,5 @@ next_separated.log
 *.db
 .pytest_cache/
 **/.pytest_cache/
+__pycache__/
+.pytest_cache/

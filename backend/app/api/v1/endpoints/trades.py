@@ -1,8 +1,10 @@
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import select, and_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete, and_, desc, func
+from app.core.dates import to_naive
+from app.core.trading import estimate_pnl_usd, normalize_pair
 from app.db.session import get_db
 from app.api.v1.deps import get_current_user
 from app.models.user import User
@@ -11,40 +13,56 @@ from app.schemas.trade import TradeCreate, TradeUpdate, Trade as TradeSchema, Tr
 
 router = APIRouter()
 
-def calculate_trade_p_l(trade_data) -> float:
-    if trade_data.exit_price is None:
-        return 0.0
+PERIOD_DAYS = {"week": 7, "month": 30, "3m": 90, "year": 365}
 
-    pair_upper = trade_data.pair.upper()
-    if "XAU" in pair_upper or "GOLD" in pair_upper:
-        contract_size = 100.0
-    elif "BTC" in pair_upper or "ETH" in pair_upper or "USD" in pair_upper or "JPY" in pair_upper or "EUR" in pair_upper or "GBP" in pair_upper:
-        contract_size = 100000.0 if not any(c in pair_upper for c in ["JPY", "HUF"]) else 1000.0
-    else:
-        contract_size = 100000.0
 
-    multiplier = 1.0
-    if "JPY" in pair_upper:
-        multiplier = 0.01
+def _resolve_pnl(trade: Trade, explicit: Optional[float]) -> float:
+    if trade.exit_price is None:
+        return 0.0  # open trade
+    if explicit is not None:
+        return round(explicit, 2)
+    estimate = estimate_pnl_usd(trade.pair, trade.direction, trade.entry_price, trade.exit_price, trade.lot_size)
+    if estimate is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Can't auto-calculate P&L for {trade.pair}. Enter the profit/loss from your broker.",
+        )
+    return estimate
 
-    diff = (trade_data.exit_price - trade_data.entry_price)
-    if trade_data.direction.upper() == "SELL":
-        diff = -diff
 
-    p_l = diff * contract_size * trade_data.lot_size * multiplier
-    return round(p_l, 2)
+async def _get_owned(db: AsyncSession, id: int, user: User) -> Trade:
+    result = await db.execute(select(Trade).where(and_(Trade.id == id, Trade.user_id == user.id)))
+    trade = result.scalar_one_or_none()
+    if not trade:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trade not found")
+    return trade
+
+
+def _planned_rr(t: Trade) -> Optional[float]:
+    if t.stop_loss and t.take_profit:
+        risk = abs(t.entry_price - t.stop_loss)
+        if risk > 0:
+            return abs(t.take_profit - t.entry_price) / risk
+    return None
+
 
 @router.get("/", response_model=List[TradeSchema])
 async def get_trades(
-    limit: Optional[int] = Query(None),
+    status_filter: Optional[str] = Query(None, alias="status", pattern="^(open|closed)$"),
+    limit: Optional[int] = Query(None, ge=1, le=500),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Trade).where(Trade.user_id == current_user.id).order_by(desc(Trade.date))
+    query = select(Trade).where(Trade.user_id == current_user.id).order_by(desc(Trade.date), desc(Trade.id))
+    if status_filter == "open":
+        query = query.where(Trade.exit_price.is_(None))
+    elif status_filter == "closed":
+        query = query.where(Trade.exit_price.isnot(None))
     if limit:
         query = query.limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
+
 
 @router.post("/", response_model=TradeSchema)
 async def create_trade(
@@ -52,145 +70,88 @@ async def create_trade(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    p_l = trade_in.p_l or 0.0
-    if trade_in.exit_price is not None:
-        p_l = calculate_trade_p_l(trade_in)
+    data = trade_in.model_dump(exclude={"p_l"})
+    data["pair"] = normalize_pair(data["pair"]) or data["pair"].upper()
+    data["strategy"] = (data.get("strategy") or "").strip() or None
+    data["notes"] = (data.get("notes") or "").strip() or None
+    data["date"] = to_naive(data.get("date"))
+    trade = Trade(**data, user_id=current_user.id)
+    trade.p_l = _resolve_pnl(trade, trade_in.p_l)
 
-    dt = trade_in.date or datetime.utcnow()
-    if dt.tzinfo is not None:
-        dt = dt.replace(tzinfo=None)
-
-    trade = Trade(
-        pair=trade_in.pair,
-        direction=trade_in.direction,
-        entry_price=trade_in.entry_price,
-        exit_price=trade_in.exit_price,
-        lot_size=trade_in.lot_size,
-        stop_loss=trade_in.stop_loss,
-        take_profit=trade_in.take_profit,
-        session=trade_in.session,
-        strategy=trade_in.strategy,
-        notes=trade_in.notes,
-        p_l=p_l,
-        date=dt,
-        user_id=current_user.id
-    )
     db.add(trade)
     await db.flush()
     await db.refresh(trade)
     return trade
+
 
 @router.get("/stats", response_model=TradeStats)
 async def get_trade_stats(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(Trade).where(
-            and_(Trade.user_id == current_user.id, Trade.exit_price.isnot(None))
-        )
-    )
+    result = await db.execute(select(Trade).where(Trade.user_id == current_user.id))
     trades = result.scalars().all()
-    total_trades = len(trades)
-
-    if total_trades == 0:
-        return {
-            "win_rate": 0.0,
-            "total_p_l": 0.0,
-            "avg_rr": 0.0,
-            "total_trades": 0
-        }
-
-    wins = [t for t in trades if t.p_l > 0]
-    win_rate = (len(wins) / total_trades) * 100
-    total_p_l = sum(t.p_l for t in trades)
-
-    rr_values = []
-    for t in trades:
-        if t.stop_loss and t.take_profit and t.entry_price:
-            risk = abs(t.entry_price - t.stop_loss)
-            reward = abs(t.take_profit - t.entry_price)
-            if risk > 0:
-                rr_values.append(reward / risk)
-    avg_rr = sum(rr_values) / len(rr_values) if rr_values else 2.0
+    closed = [t for t in trades if t.exit_price is not None]
+    wins = [t.p_l for t in closed if t.p_l > 0]
+    losses = [t.p_l for t in closed if t.p_l < 0]
+    rr = [r for r in (_planned_rr(t) for t in closed) if r is not None]
+    gross_loss = abs(sum(losses))
 
     return {
-        "win_rate": round(win_rate, 1),
-        "total_p_l": round(total_p_l, 2),
-        "avg_rr": round(avg_rr, 2),
-        "total_trades": total_trades
+        "total_trades": len(closed),
+        "open_trades": len(trades) - len(closed),
+        "wins": len(wins),
+        "losses": len(losses),
+        "win_rate": round(len(wins) / len(closed) * 100, 1) if closed else 0.0,
+        "total_p_l": round(sum(t.p_l for t in closed), 2),
+        "profit_factor": round(sum(wins) / gross_loss, 2) if gross_loss else None,
+        "avg_rr": round(sum(rr) / len(rr), 2) if rr else None,
+        "best_trade": max((t.p_l for t in closed), default=None),
+        "worst_trade": min((t.p_l for t in closed), default=None),
     }
+
 
 @router.get("/analytics")
 async def get_trade_analytics(
-    period: str = Query("3m"),
+    period: str = Query("3m", pattern="^(week|month|3m|year|all)$"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    days = 90
-    if period == "week":
-        days = 7
-    elif period == "month":
-        days = 30
-    elif period == "year":
-        days = 365
+    query = select(Trade).where(
+        and_(Trade.user_id == current_user.id, Trade.exit_price.isnot(None))
+    ).order_by(Trade.date.asc(), Trade.id.asc())
+    if period in PERIOD_DAYS:
+        query = query.where(Trade.date >= datetime.utcnow() - timedelta(days=PERIOD_DAYS[period]))
+    trades = (await db.execute(query)).scalars().all()
 
-    since_date = datetime.utcnow() - timedelta(days=days)
-    result = await db.execute(
-        select(Trade).where(
-            and_(
-                Trade.user_id == current_user.id,
-                Trade.date >= since_date,
-                Trade.exit_price.isnot(None)
-            )
-        ).order_by(Trade.date.asc())
-    )
-    trades = result.scalars().all()
-
-    cumulative_points = []
-    running_p_l = 0.0
-
-    cumulative_points.append({
-        "date": (datetime.utcnow() - timedelta(days=days + 1)).strftime("%Y-%m-%d"),
-        "value": 0.0
-    })
-
+    cumulative, running = [], 0.0
     for t in trades:
-        running_p_l += t.p_l
-        cumulative_points.append({
-            "date": t.date.strftime("%Y-%m-%d"),
-            "value": round(running_p_l, 2)
-        })
+        running += t.p_l
+        cumulative.append({"date": t.date.strftime("%Y-%m-%d"), "value": round(running, 2)})
 
-    sessions = {"London": 0.0, "New York": 0.0, "Asian": 0.0}
-    session_counts = {"London": 0, "New York": 0, "Asian": 0}
-    for t in trades:
-        sess = t.session or "London"
-        if sess in sessions:
-            sessions[sess] += t.p_l
-            session_counts[sess] += 1
-
-    session_performance = [
-        {"name": k, "value": round(v, 2), "trades": session_counts[k]}
-        for k, v in sessions.items()
-    ]
-
-    strategies = {}
-    for t in trades:
-        strat = t.strategy or "Scalp"
-        strategies[strat] = strategies.get(strat, 0.0) + t.p_l
-
-    strategy_performance = [
-        {"name": k, "p_l": round(v, 2)} for k, v in strategies.items()
-    ]
-    strategy_performance = sorted(strategy_performance, key=lambda x: x["p_l"], reverse=True)
+    def group(key) -> list[dict]:
+        buckets: dict[str, dict] = {}
+        for t in trades:
+            name = key(t)
+            b = buckets.setdefault(name, {"name": name, "p_l": 0.0, "trades": 0, "wins": 0})
+            b["p_l"] += t.p_l
+            b["trades"] += 1
+            b["wins"] += t.p_l > 0
+        rows = [
+            {**b, "p_l": round(b["p_l"], 2), "win_rate": round(b["wins"] / b["trades"] * 100, 1)}
+            for b in buckets.values()
+        ]
+        return sorted(rows, key=lambda r: r["p_l"], reverse=True)
 
     return {
         "period": period,
-        "cumulative_p_l": cumulative_points,
-        "session_performance": session_performance,
-        "strategy_performance": strategy_performance
+        "total_p_l": round(running, 2),
+        "cumulative_p_l": cumulative,
+        "by_session": group(lambda t: t.session or "Unknown"),
+        "by_strategy": group(lambda t: t.strategy or "Untagged"),
+        "by_pair": group(lambda t: t.pair),
     }
+
 
 @router.get("/{id}", response_model=TradeSchema)
 async def get_trade_detail(
@@ -198,18 +159,8 @@ async def get_trade_detail(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(Trade).where(
-            and_(Trade.id == id, Trade.user_id == current_user.id)
-        )
-    )
-    trade = result.scalar_one_or_none()
-    if not trade:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Trade log not found"
-        )
-    return trade
+    return await _get_owned(db, id, current_user)
+
 
 @router.put("/{id}", response_model=TradeSchema)
 async def update_trade(
@@ -218,34 +169,32 @@ async def update_trade(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(Trade).where(
-            and_(Trade.id == id, Trade.user_id == current_user.id)
-        )
-    )
-    trade = result.scalar_one_or_none()
-    if not trade:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Trade log not found"
-        )
-
+    trade = await _get_owned(db, id, current_user)
     update_data = trade_in.model_dump(exclude_unset=True)
-    if "date" in update_data and update_data["date"] is not None:
-        dt = update_data["date"]
-        if dt.tzinfo is not None:
-            update_data["date"] = dt.replace(tzinfo=None)
+    explicit_pnl = update_data.pop("p_l", None)
 
+    if update_data.get("date") is not None:
+        update_data["date"] = to_naive(update_data["date"])
+    if update_data.get("pair"):
+        update_data["pair"] = normalize_pair(update_data["pair"]) or update_data["pair"].upper()
+    for field in ("strategy", "notes"):
+        if field in update_data:
+            update_data[field] = (update_data[field] or "").strip() or None
+
+    # Nullable fields may be cleared (e.g. exit_price=None re-opens a trade)
+    nullable = {"exit_price", "stop_loss", "take_profit", "strategy", "notes"}
     for field, value in update_data.items():
-        setattr(trade, field, value)
+        if value is not None or field in nullable:
+            setattr(trade, field, value)
 
-    if trade.exit_price is not None:
-        trade.p_l = calculate_trade_p_l(trade)
-
+    price_changed = any(f in update_data for f in ("pair", "direction", "entry_price", "exit_price", "lot_size"))
+    if explicit_pnl is not None or price_changed:
+        trade.p_l = _resolve_pnl(trade, explicit_pnl)
     db.add(trade)
     await db.flush()
     await db.refresh(trade)
     return trade
+
 
 @router.delete("/{id}")
 async def delete_trade(
@@ -253,16 +202,6 @@ async def delete_trade(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(Trade).where(
-            and_(Trade.id == id, Trade.user_id == current_user.id)
-        )
-    )
-    trade = result.scalar_one_or_none()
-    if not trade:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Trade log not found"
-        )
-    await db.execute(delete(Trade).where(Trade.id == id))
-    return {"detail": "Trade log deleted successfully"}
+    trade = await _get_owned(db, id, current_user)
+    await db.delete(trade)
+    return {"detail": "Trade deleted successfully"}

@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest
+pytest-asyncio
+aiosqlite<0.22  # 0.22 hangs with SQLAlchemy 2.0.41
+httpx

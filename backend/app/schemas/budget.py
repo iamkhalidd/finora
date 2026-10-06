@@ -1,25 +1,21 @@
-from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-class BudgetBase(BaseModel):
-    category: str
-    limit: float
-    spent: float = 0.0
 
-class BudgetCreate(BudgetBase):
-    pass
+class BudgetCreate(BaseModel):
+    category: str = Field(min_length=1, max_length=50)
+    limit: float = Field(gt=0)
+
 
 class BudgetUpdate(BaseModel):
-    category: Optional[str] = None
-    limit: Optional[float] = None
-    spent: Optional[float] = None
+    limit: float = Field(gt=0)
 
-class BudgetInDBBase(BudgetBase):
+
+class Budget(BaseModel):
     id: int
-    user_id: int
+    category: str
+    limit: float
+    # Spent in the requested month, computed from transactions
+    spent: float = 0.0
 
     class Config:
         from_attributes = True
-
-class Budget(BudgetInDBBase):
-    pass
