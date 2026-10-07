@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
 
@@ -10,7 +11,7 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", displa
 const ICON_NAMES = [
   "account_balance", "account_balance_wallet", "add", "add_card", "arrow_back", "badge", "bolt",
   "candlestick_chart", "category", "celebration", "check_circle", "chevron_left", "chevron_right",
-  "close", "cloud_off", "currency_exchange", "delete", "directions_car", "edit", "error",
+  "close", "cloud_off", "contrast", "currency_exchange", "delete", "directions_car", "edit", "error",
   "family_restroom", "flight", "home", "insights", "live_tv", "local_gas_station", "lock", "logout",
   "medical_services", "more_horiz", "north_east", "payments", "person", "pie_chart", "receipt_long",
   "redeem", "refresh", "remove", "restaurant", "savings", "school", "search", "search_off",
@@ -24,11 +25,14 @@ const ICON_FONT_URL =
 export const metadata: Metadata = {
   title: "Finora",
   description: "Track your naira, stick to your budgets and keep an honest trading journal.",
-  appleWebApp: { capable: true, title: "Finora", statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: "Finora", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a1220",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f5f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#111214" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -36,8 +40,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-NG" className={manrope.variable}>
+    <html lang="en-NG" className={manrope.variable} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link rel="stylesheet" href={ICON_FONT_URL} />

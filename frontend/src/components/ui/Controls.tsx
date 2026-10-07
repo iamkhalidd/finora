@@ -14,14 +14,14 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex bg-surface border border-line rounded-xl p-1">
+    <div className="flex bg-surface-2 rounded-xl p-1">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={`flex-1 py-2 rounded-lg text-[13px] font-bold transition ${
-            value === o.value ? o.activeClass ?? "bg-surface-2 text-ink" : "text-muted hover:text-ink"
+            value === o.value ? `bg-surface shadow-sm ${o.activeClass ?? "text-ink"}` : "text-muted hover:text-ink"
           }`}
         >
           {o.label}
@@ -136,7 +136,7 @@ export function ConfirmDelete({
   return (
     <div className="flex gap-2">
       <button type="button" onClick={() => setArmed(false)} className="btn-ghost flex-1">Cancel</button>
-      <button type="button" onClick={onConfirm} disabled={pending} className="btn flex-1 bg-expense text-bg py-3">
+      <button type="button" onClick={onConfirm} disabled={pending} className="btn flex-1 bg-expense text-surface py-3">
         {pending ? "Deleting…" : "Yes, delete"}
       </button>
     </div>

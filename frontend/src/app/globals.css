@@ -2,9 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme ────────────────────────────────────────────────────
+   Neutrals carry the UI; navy is the single accent; green/red/amber are
+   reserved for money in, money out and budget warnings. All text pairs
+   pass WCAG AA in both themes. */
+@layer base {
+  :root {
+    color-scheme: light;
+    --bg: 246 245 242; /* #f6f5f2 */
+    --surface: 255 255 255; /* #ffffff */
+    --surface-2: 239 238 233; /* #efeee9 */
+    --line: 227 225 219; /* #e3e1db */
+    --ink: 24 25 27; /* #18191b */
+    --muted: 93 95 99; /* #5d5f63 */
+    --faint: 134 136 140; /* #86888c */
+    --primary: 31 58 104; /* #1f3a68 */
+    --on-primary: 255 255 255; /* #ffffff */
+    --income: 28 117 71; /* #1c7547 */
+    --expense: 178 54 44; /* #b2362c */
+    --warn: 154 98 0; /* #9a6200 */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: 17 18 20; /* #111214 */
+      --surface: 26 27 30; /* #1a1b1e */
+      --surface-2: 37 39 43; /* #25272b */
+      --line: 47 49 54; /* #2f3136 */
+      --ink: 236 236 234; /* #ececea */
+      --muted: 163 165 170; /* #a3a5aa */
+      --faint: 116 118 124; /* #74767c */
+      --primary: 169 191 232; /* #a9bfe8 */
+      --on-primary: 16 32 61; /* #10203d */
+      --income: 98 189 140; /* #62bd8c */
+      --expense: 232 131 120; /* #e88378 */
+      --warn: 217 164 62; /* #d9a43e */
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: 17 18 20; /* #111214 */
+    --surface: 26 27 30; /* #1a1b1e */
+    --surface-2: 37 39 43; /* #25272b */
+    --line: 47 49 54; /* #2f3136 */
+    --ink: 236 236 234; /* #ececea */
+    --muted: 163 165 170; /* #a3a5aa */
+    --faint: 116 118 124; /* #74767c */
+    --primary: 169 191 232; /* #a9bfe8 */
+    --on-primary: 16 32 61; /* #10203d */
+    --income: 98 189 140; /* #62bd8c */
+    --expense: 232 131 120; /* #e88378 */
+    --warn: 217 164 62; /* #d9a43e */
+  }
+}
+
+
 @layer base {
   html {
-    color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
   }
   body {
@@ -19,11 +73,14 @@
   .card {
     @apply bg-surface border border-line rounded-2xl;
   }
+  :root:not([data-theme="dark"]) .card {
+    box-shadow: 0 1px 2px rgb(24 25 27 / 0.04);
+  }
   .label {
     @apply text-xs font-semibold text-muted;
   }
   .input {
-    @apply w-full bg-bg border border-line rounded-xl px-3.5 py-3 text-[15px] text-ink placeholder:text-faint outline-none transition-colors focus:border-primary/60;
+    @apply w-full bg-surface border border-line rounded-xl px-3.5 py-3 text-[15px] text-ink placeholder:text-faint outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15;
   }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
@@ -32,22 +89,22 @@
     @apply btn bg-primary text-on-primary px-5 py-3.5;
   }
   .btn-ghost {
-    @apply btn bg-surface-2 text-ink px-4 py-3;
+    @apply btn bg-surface border border-line text-ink px-4 py-3;
   }
   .btn-danger {
-    @apply btn bg-expense/10 text-expense border border-expense/25 px-4 py-3;
+    @apply btn bg-surface text-expense border border-expense/30 px-4 py-3;
   }
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition;
   }
   .chip-off {
-    @apply chip border-line bg-surface text-muted;
+    @apply chip border-line bg-surface text-muted hover:text-ink;
   }
   .chip-on {
-    @apply chip border-primary/50 bg-primary/15 text-primary;
+    @apply chip border-primary bg-primary text-on-primary;
   }
   .skeleton {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background: linear-gradient(90deg, rgb(var(--surface-2)) 25%, rgb(var(--line)) 50%, rgb(var(--surface-2)) 75%);
     background-size: 400px 100%;
     @apply animate-shimmer rounded-lg;
   }

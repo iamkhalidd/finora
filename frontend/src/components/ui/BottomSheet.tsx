@@ -29,7 +29,7 @@ export default function BottomSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal aria-label={title}>
-      <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={onClose} />
       <div className="relative w-full max-w-md bg-surface border-t border-line rounded-t-3xl px-5 pt-4 pb-6 pb-safe max-h-[90vh] overflow-y-auto animate-slide-up">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-extrabold">{title}</h2>
