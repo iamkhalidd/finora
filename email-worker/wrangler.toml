@@ -1,0 +1,10 @@
+name = "finora-email"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Your Render backend, no trailing slash
+API_URL = "https://finora-backend.onrender.com"
+
+# Set the secret with: npx wrangler secret put INBOUND_SECRET
+# (same value as INBOUND_EMAIL_SECRET on the backend)

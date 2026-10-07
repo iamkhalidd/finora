@@ -9,6 +9,7 @@ import { MonthSwitcher, Segmented } from "@/components/ui/Controls";
 import { EmptyState, ErrorState, SkeletonRows } from "@/components/ui/States";
 import TransactionRow from "@/components/TransactionRow";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useImports } from "@/hooks/useImports";
 import { currentMonth, dayHeading, naira } from "@/lib/format";
 import type { Transaction, TxType } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
 
   const { data, isLoading, isError, refetch } = useTransactions({ month });
+  const toReview = (useImports().data ?? []).length;
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -49,12 +51,20 @@ export default function TransactionsPage() {
       <PageHeader
         title="Transactions"
         right={
+          <>
+          <Link href="/imports" aria-label="To review" className="relative w-10 h-10 rounded-full flex items-center justify-center border bg-surface border-line text-muted hover:text-ink">
+            <Icon name="inbox" size={20} />
+            {toReview > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-on-primary text-[10px] font-extrabold flex items-center justify-center">{toReview}</span>
+            )}
+          </Link>
           <HeaderButton
             icon={searchOpen ? "close" : "search"}
             label="Search"
             active={searchOpen}
             onClick={() => { setSearchOpen(!searchOpen); setSearch(""); }}
           />
+          </>
         }
       />
 

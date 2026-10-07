@@ -54,3 +54,11 @@ export function categoryIcon(name: string): string {
 export function categoriesFor(type: TxType): Category[] {
   return type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 }
+
+// Sender domains for the Gmail forwarding filter (mirrors BANK_DOMAINS in backend/app/core/alerts.py)
+export const BANK_SENDER_DOMAINS = [
+  "gtbank.com", "gtco.com", "accessbankplc.com", "zenithbank.com", "firstbanknigeria.com", "ubagroup.com",
+  "fcmb.com", "fidelitybank.ng", "sterling.ng", "wemabank.com", "alat.ng", "stanbicibtc.com", "unionbankng.com",
+  "ecobank.com", "polarisbanklimited.com", "providusbank.com", "keystonebankng.com", "kudabank.com", "kuda.com",
+  "opayweb.com", "opay-inc.com", "moniepoint.com", "palmpay.com", "carbon.ng", "fairmoney.ng", "vfdtech.ng",
+];

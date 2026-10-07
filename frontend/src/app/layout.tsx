@@ -9,13 +9,15 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", displa
 // Only these Material Symbols are downloaded (a few KB instead of ~1MB).
 // Add any new <Icon name="..."> here.
 const ICON_NAMES = [
-  "account_balance", "account_balance_wallet", "add", "add_card", "arrow_back", "badge", "bolt",
-  "candlestick_chart", "category", "celebration", "check_circle", "chevron_left", "chevron_right",
-  "close", "cloud_off", "contrast", "currency_exchange", "delete", "directions_car", "edit", "error",
-  "family_restroom", "flight", "home", "insights", "live_tv", "local_gas_station", "lock", "logout",
-  "medical_services", "more_horiz", "north_east", "payments", "person", "pie_chart", "receipt_long",
-  "redeem", "refresh", "remove", "restaurant", "savings", "school", "search", "search_off",
-  "shopping_bag", "smartphone", "south_west", "storefront", "task_alt", "trending_up", "visibility",
+  "account_balance", "account_balance_wallet", "add", "add_card", "arrow_back", "autorenew",
+  "badge", "bolt", "candlestick_chart", "category", "celebration", "check", "check_circle",
+  "chevron_left", "chevron_right", "close", "cloud_off", "content_copy", "content_paste",
+  "contrast", "currency_exchange", "delete", "directions_car", "done_all", "edit", "error",
+  "family_restroom", "flight", "home", "inbox", "insights", "live_tv", "local_gas_station", "lock",
+  "logout", "mail", "mark_email_read", "medical_services", "more_horiz", "north_east",
+  "open_in_new", "payments", "person", "pie_chart", "receipt_long", "redeem", "refresh", "remove",
+  "restaurant", "savings", "schedule", "school", "search", "search_off", "shopping_bag",
+  "smartphone", "south_west", "storefront", "task_alt", "trending_up", "visibility",
   "visibility_off", "volunteer_activism", "warning", "work",
 ];
 const ICON_FONT_URL =

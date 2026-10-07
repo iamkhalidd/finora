@@ -83,3 +83,26 @@ export interface TradeAnalytics {
   by_strategy: GroupStat[];
   by_pair: GroupStat[];
 }
+
+export interface ImportedTransaction {
+  id: number;
+  status: "pending" | "unreadable";
+  source: "email" | "paste";
+  amount: number | null;
+  type: TxType | null;
+  description: string | null;
+  bank: string | null;
+  reference: string | null;
+  occurred_at: string | null;
+  suggested_category: string | null;
+  subject: string | null;
+  raw_excerpt: string | null;
+  created_at: string;
+}
+
+export interface InboundAddress {
+  enabled: boolean;
+  address: string | null;
+  last_received_at: string | null;
+  confirmation: { code: string | null; link: string | null; received_at: string } | null;
+}

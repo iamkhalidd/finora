@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     # Set to true in production (HTTPS). Cross-site cookies (frontend and API on
     # different domains) are only sent by browsers when Secure + SameSite=None.
     COOKIE_SECURE: bool = False
+    # Email import: alerts forwarded to <token>@INBOUND_EMAIL_DOMAIN are delivered by
+    # an email worker to /api/v1/inbound/email with this shared secret. Both unset = off.
+    INBOUND_EMAIL_DOMAIN: str = ""
+    INBOUND_EMAIL_SECRET: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:
