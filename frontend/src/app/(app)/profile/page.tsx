@@ -132,6 +132,7 @@ export default function ProfilePage() {
         </section>
 
         <section className="card divide-y divide-line overflow-hidden">
+          <Row icon="mail" label="Import from email" sub="Turn bank alert emails into transactions" onClick={() => router.push("/imports/setup")} />
           <Row icon="pie_chart" label="Budgets" sub="Monthly spending limits" onClick={() => router.push("/budgets")} />
           <Row icon="insights" label="Trading performance" sub="Win rate, best instruments and sessions" onClick={() => router.push("/trades/stats")} />
         </section>

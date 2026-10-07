@@ -11,6 +11,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useSummary, useTransactions } from "@/hooks/useTransactions";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useTradeStats } from "@/hooks/useTrades";
+import { useImports } from "@/hooks/useImports";
 import { currentMonth, daysLeftInMonth, monthLabel, naira, usd } from "@/lib/format";
 
 function greeting() {
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   const recent = useTransactions({ limit: 5 });
   const budgets = useBudgets(month);
   const stats = useTradeStats();
+  const toReview = (useImports().data ?? []).length;
 
   const s = summary.data;
   const firstName = user?.name.split(" ")[0];
@@ -104,6 +106,19 @@ export default function DashboardPage() {
             <Icon name="add" size={18} className="text-income" /> Add income
           </Link>
         </div>
+
+        {toReview > 0 && (
+          <Link href="/imports" className="card p-4 flex items-center gap-3 border-primary/40 hover:bg-surface-2/50">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Icon name="inbox" size={20} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">{toReview} bank alert{toReview === 1 ? "" : "s"} to review</p>
+              <p className="text-xs text-muted">Check them and add them to your transactions.</p>
+            </div>
+            <Icon name="chevron_right" size={20} className="text-muted" />
+          </Link>
+        )}
 
         {/* ── Budget watch ───────────────────────────── */}
         {budgets.data && budgets.data.length === 0 && (
