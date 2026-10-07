@@ -54,5 +54,3 @@ export function categoryIcon(name: string): string {
 export function categoriesFor(type: TxType): Category[] {
   return type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 }
-
-export const CHART_COLORS = ["#7fb6ff", "#3ddc97", "#f5b942", "#c792ea", "#ff7b72", "#5eead4", "#8d99ad"];

@@ -2,21 +2,23 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
+  darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
+      // Values live in globals.css as RGB triplets so light/dark themes swap in one place
       colors: {
-        bg: "#0a1220",
-        surface: "#111b2d",
-        "surface-2": "#18253b",
-        line: "rgba(255,255,255,0.07)",
-        ink: "#e8eef8",
-        muted: "#8d99ad",
-        faint: "#5d6a80",
-        primary: "#7fb6ff",
-        "on-primary": "#06213f",
-        income: "#3ddc97",
-        expense: "#ff7b72",
-        warn: "#f5b942",
+        "bg": "rgb(var(--bg) / <alpha-value>)",
+        "surface": "rgb(var(--surface) / <alpha-value>)",
+        "surface-2": "rgb(var(--surface-2) / <alpha-value>)",
+        "line": "rgb(var(--line) / <alpha-value>)",
+        "ink": "rgb(var(--ink) / <alpha-value>)",
+        "muted": "rgb(var(--muted) / <alpha-value>)",
+        "faint": "rgb(var(--faint) / <alpha-value>)",
+        "primary": "rgb(var(--primary) / <alpha-value>)",
+        "on-primary": "rgb(var(--on-primary) / <alpha-value>)",
+        "income": "rgb(var(--income) / <alpha-value>)",
+        "expense": "rgb(var(--expense) / <alpha-value>)",
+        "warn": "rgb(var(--warn) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["var(--font-manrope)", "system-ui", "sans-serif"],

@@ -1,18 +1,19 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/ui/Icon";
 import PageHeader from "@/components/ui/PageHeader";
 import BottomSheet from "@/components/ui/BottomSheet";
-import { Field } from "@/components/ui/Controls";
+import { Field, Segmented } from "@/components/ui/Controls";
 import { FormError } from "@/components/ui/States";
 import { PasswordInput } from "@/components/auth/AuthShell";
 import { useProfile, useProfileMutations } from "@/hooks/useProfile";
 import { api } from "@/lib/api";
 import { removeAccessToken } from "@/lib/auth";
 import { errorMessage } from "@/lib/format";
+import { getThemePref, setThemePref, type ThemePref } from "@/lib/theme";
 
 type Sheet = "name" | "password" | null;
 
@@ -42,6 +43,12 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const close = useCallback(() => setSheet(null), []);
+  const [theme, setTheme] = useState<ThemePref>("system");
+  useEffect(() => setTheme(getThemePref()), []);
+  const changeTheme = (pref: ThemePref) => {
+    setTheme(pref);
+    setThemePref(pref);
+  };
 
   const open = (s: Sheet) => {
     setSheet(s);
@@ -109,6 +116,19 @@ export default function ProfilePage() {
         <section className="card divide-y divide-line overflow-hidden">
           <Row icon="badge" label="Name" sub={user?.name} onClick={() => open("name")} />
           <Row icon="lock" label="Change password" onClick={() => open("password")} />
+        </section>
+
+        <section className="card p-4 flex flex-col gap-2.5">
+          <p className="text-sm font-bold flex items-center gap-2"><Icon name="contrast" size={20} className="text-muted" /> Appearance</p>
+          <Segmented<ThemePref>
+            value={theme}
+            onChange={changeTheme}
+            options={[
+              { value: "system", label: "Automatic" },
+              { value: "light", label: "Light" },
+              { value: "dark", label: "Dark" },
+            ]}
+          />
         </section>
 
         <section className="card divide-y divide-line overflow-hidden">

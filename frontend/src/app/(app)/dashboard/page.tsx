@@ -63,7 +63,7 @@ export default function DashboardPage() {
         {summary.isError ? (
           <ErrorState onRetry={() => summary.refetch()} />
         ) : (
-          <section className="card p-5 bg-gradient-to-br from-primary/[0.12] to-transparent">
+          <section className="card p-5">
             <p className="text-sm text-muted font-semibold">{monthLabel(month)}</p>
             {!s ? (
               <Skeleton className="h-10 w-48 mt-2" />

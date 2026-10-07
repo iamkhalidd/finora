@@ -84,8 +84,8 @@ export default function TransactionForm({ initialType = "expense", existing }: {
         value={type}
         onChange={changeType}
         options={[
-          { value: "expense", label: "Expense", activeClass: "bg-expense/15 text-expense" },
-          { value: "income", label: "Income", activeClass: "bg-income/15 text-income" },
+          { value: "expense", label: "Expense", activeClass: "text-expense" },
+          { value: "income", label: "Income", activeClass: "text-income" },
         ]}
       />
 
@@ -96,7 +96,7 @@ export default function TransactionForm({ initialType = "expense", existing }: {
       <Field label="Category" hint={hint}>
         <div className="grid grid-cols-4 gap-2">
           {legacy && (
-            <button type="button" className="flex flex-col items-center gap-1 rounded-xl border p-2 py-2.5 border-primary/50 bg-primary/15 text-primary">
+            <button type="button" className="flex flex-col items-center gap-1 rounded-xl border p-2 py-2.5 border-primary bg-primary/[0.06] text-primary">
               <Icon name={categoryIcon(category)} size={22} />
               <span className="text-[10.5px] font-semibold leading-tight text-center">{category}</span>
             </button>
@@ -109,7 +109,7 @@ export default function TransactionForm({ initialType = "expense", existing }: {
                 type="button"
                 onClick={() => setCategory(c.name)}
                 className={`flex flex-col items-center gap-1 rounded-xl border p-2 py-2.5 transition ${
-                  on ? "border-primary/50 bg-primary/15 text-primary" : "border-line bg-surface text-muted hover:text-ink"
+                  on ? "border-primary bg-primary/[0.06] text-primary" : "border-line bg-surface text-muted hover:text-ink"
                 }`}
               >
                 <Icon name={c.icon} size={22} filled={on} />

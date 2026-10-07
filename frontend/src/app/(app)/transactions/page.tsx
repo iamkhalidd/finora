@@ -120,7 +120,7 @@ export default function TransactionsPage() {
       <Link
         href="/transactions/new"
         aria-label="Add transaction"
-        className="fixed bottom-24 right-[max(1rem,calc(50%-14rem+1rem))] z-30 w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg shadow-black/40 active:scale-95 transition"
+        className="fixed bottom-24 right-[max(1rem,calc(50%-14rem+1rem))] z-30 w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg shadow-black/25 active:scale-95 transition"
       >
         <Icon name="add" size={28} />
       </Link>

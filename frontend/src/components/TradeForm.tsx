@@ -113,8 +113,8 @@ export default function TradeForm({ existing }: { existing?: Trade }) {
         value={direction}
         onChange={setDirection}
         options={[
-          { value: "BUY", label: "Buy", activeClass: "bg-income/15 text-income" },
-          { value: "SELL", label: "Sell", activeClass: "bg-expense/15 text-expense" },
+          { value: "BUY", label: "Buy", activeClass: "text-income" },
+          { value: "SELL", label: "Sell", activeClass: "text-expense" },
         ]}
       />
 
