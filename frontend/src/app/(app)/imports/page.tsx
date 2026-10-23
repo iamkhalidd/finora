@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
 import PageHeader, { HeaderButton } from "@/components/ui/PageHeader";
+import TransactionTabs from "@/components/TransactionTabs";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { AmountInput, Field, Segmented } from "@/components/ui/Controls";
 import { EmptyState, ErrorState, FormError, SkeletonRows } from "@/components/ui/States";
@@ -80,12 +81,12 @@ export default function ImportsPage() {
   return (
     <>
       <PageHeader
-        title="To review"
-        back
+        title="Transactions"
         right={<HeaderButton icon="content_paste" label="Paste an alert" onClick={() => { setSheet({ mode: "paste" }); setError(""); }} />}
       />
 
       <div className="px-4 flex flex-col gap-4 pb-6">
+        <TransactionTabs />
         {notice && <p className="text-sm font-semibold text-muted px-1">{notice}</p>}
 
         {isLoading ? (
@@ -104,42 +105,44 @@ export default function ImportsPage() {
         ) : null}
 
         {withSuggestion > 1 && (
-          <button onClick={() => approveSuggested.mutate()} disabled={approveSuggested.isPending} className="btn-primary">
+          <button onClick={() => approveSuggested.mutate()} disabled={approveSuggested.isPending} className="btn-primary lg:self-start">
             <Icon name="done_all" size={20} /> Add all {withSuggestion} with suggested categories
           </button>
         )}
 
-        {pending.map((item) => {
-          const income = item.type === "income";
-          return (
-            <article key={item.id} className="card p-4 flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted font-semibold">
-                    {[item.bank, item.occurred_at && shortDate(item.occurred_at), item.source === "paste" && "Pasted"].filter(Boolean).join(" · ")}
-                  </p>
-                  <p className="text-sm font-bold mt-0.5 break-words">{item.description || item.subject}</p>
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          {pending.map((item) => {
+            const income = item.type === "income";
+            return (
+              <article key={item.id} className="card p-4 flex flex-col gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted font-semibold">
+                      {[item.bank, item.occurred_at && shortDate(item.occurred_at), item.source === "paste" && "Pasted"].filter(Boolean).join(" · ")}
+                    </p>
+                    <p className="text-sm font-bold mt-0.5 break-words">{item.description || item.subject}</p>
+                  </div>
+                  <span className={`text-[17px] font-extrabold tabular-nums shrink-0 ${income ? "text-income" : ""}`}>
+                    {income ? "+" : "-"}{naira(item.amount ?? 0)}
+                  </span>
                 </div>
-                <span className={`text-[17px] font-extrabold tabular-nums shrink-0 ${income ? "text-income" : ""}`}>
-                  {income ? "+" : "-"}{naira(item.amount ?? 0)}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => dismiss.mutate(item.id)} aria-label="Dismiss" className="btn-ghost px-3">
-                  <Icon name="close" size={20} />
-                </button>
-                <button onClick={() => openReview(item)} className="btn-ghost flex-1 text-sm">
-                  {item.suggested_category ? "Edit" : "Choose category"}
-                </button>
-                {item.suggested_category && (
-                  <button onClick={() => quickAdd(item)} disabled={approve.isPending} className="btn-primary flex-[1.4] py-3 text-sm">
-                    Add as {item.suggested_category}
+                <div className="flex gap-2">
+                  <button onClick={() => dismiss.mutate(item.id)} aria-label="Dismiss" className="btn-ghost px-3">
+                    <Icon name="close" size={20} />
                   </button>
-                )}
-              </div>
-            </article>
-          );
-        })}
+                  <button onClick={() => openReview(item)} className="btn-ghost flex-1 text-sm">
+                    {item.suggested_category ? "Edit" : "Choose category"}
+                  </button>
+                  {item.suggested_category && (
+                    <button onClick={() => quickAdd(item)} disabled={approve.isPending} className="btn-primary flex-[1.4] py-3 text-sm">
+                      Add as {item.suggested_category}
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
 
         {unreadable.length > 0 && (
           <section className="flex flex-col gap-2">

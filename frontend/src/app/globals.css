@@ -101,7 +101,7 @@
   }
   .hero::after {
     content: "";
-    @apply absolute -right-10 -top-10 w-36 h-36 rounded-full bg-sun pointer-events-none;
+    @apply absolute -right-12 -top-12 w-28 h-28 rounded-full bg-sun pointer-events-none lg:-right-10 lg:-top-10 lg:w-36 lg:h-36;
   }
   .hero > * {
     @apply relative z-[1];
