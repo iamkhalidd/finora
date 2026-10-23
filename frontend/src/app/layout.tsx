@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+const body = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const display = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display", display: "swap" });
 
 // Only these Material Symbols are downloaded (a few KB instead of ~1MB).
 // Add any new <Icon name="..."> here.
@@ -32,8 +33,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f5f2" },
-    { media: "(prefers-color-scheme: dark)", color: "#111214" },
+    { media: "(prefers-color-scheme: light)", color: "#eef2ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a130f" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -42,7 +43,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-NG" className={manrope.variable} suppressHydrationWarning>
+    <html lang="en-NG" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

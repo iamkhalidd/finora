@@ -9,6 +9,7 @@ import { useTransactionMutations } from "@/hooks/useTransactions";
 import { categoriesFor, categoryIcon } from "@/lib/categories";
 import { dateInputToISO, errorMessage, todayInput } from "@/lib/format";
 import type { Transaction, TxType } from "@/lib/types";
+import ActionBar from "@/components/shell/ActionBar";
 
 export default function TransactionForm({ initialType = "expense", existing }: { initialType?: TxType; existing?: Transaction }) {
   const router = useRouter();
@@ -138,18 +139,16 @@ export default function TransactionForm({ initialType = "expense", existing }: {
 
       {existing && <ConfirmDelete onConfirm={handleDelete} pending={remove.isPending} label="Delete transaction" />}
 
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-bg/95 backdrop-blur-md border-t border-line pb-safe">
-        <div className="max-w-md mx-auto px-4 py-3 flex gap-2">
-          {!existing && (
-            <button type="button" onClick={() => submit(true)} disabled={saving} className="btn-ghost flex-1 text-sm">
-              Save & add another
-            </button>
-          )}
-          <button type="submit" disabled={saving} className="btn-primary flex-1">
-            {saving ? "Saving…" : existing ? "Save changes" : "Save"}
+      <ActionBar>
+        {!existing && (
+          <button type="button" onClick={() => submit(true)} disabled={saving} className="btn-ghost flex-1 text-sm">
+            Save & add another
           </button>
-        </div>
-      </div>
+        )}
+        <button type="submit" disabled={saving} className="btn-primary flex-1">
+          {saving ? "Saving…" : existing ? "Save changes" : "Save"}
+        </button>
+      </ActionBar>
     </form>
   );
 }

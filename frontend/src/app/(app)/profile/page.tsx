@@ -95,7 +95,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <PageHeader title="Profile" />
+      <PageHeader title="Settings" back="/dashboard" />
       <div className="px-4 flex flex-col gap-5 pb-6">
         <section className="flex items-center gap-4 px-1">
           <div className="w-16 h-16 rounded-full bg-primary/15 text-primary flex items-center justify-center text-2xl font-extrabold">

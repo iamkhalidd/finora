@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
-import PageHeader, { HeaderButton } from "@/components/ui/PageHeader";
+import PageHeader from "@/components/ui/PageHeader";
 import { EmptyState, ErrorState, Skeleton, SkeletonRows } from "@/components/ui/States";
 import CategoryBars from "@/components/charts/CategoryBars";
 import TransactionRow from "@/components/TransactionRow";
@@ -57,7 +57,6 @@ export default function DashboardPage() {
       <PageHeader
         subtitle={greeting() + (firstName ? "," : "")}
         title={firstName ?? "Welcome"}
-        right={<HeaderButton icon="add" label="Add transaction" onClick={() => router.push("/transactions/new")} />}
       />
 
       <div className="px-4 flex flex-col gap-6 pb-4">

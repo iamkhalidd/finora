@@ -8,6 +8,7 @@ import { useTradeMutations, useTrades } from "@/hooks/useTrades";
 import { dateInputToISO, errorMessage, todayInput, usd } from "@/lib/format";
 import { canEstimate, currentSession, estimatePnl, plannedRR, POPULAR_INSTRUMENTS, SESSIONS } from "@/lib/trading";
 import type { Direction, Trade } from "@/lib/types";
+import ActionBar from "@/components/shell/ActionBar";
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v));
 const str = (v: number | null | undefined) => (v == null ? "" : String(v));
@@ -176,13 +177,11 @@ export default function TradeForm({ existing }: { existing?: Trade }) {
 
       <FormError message={error} />
 
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-bg/95 backdrop-blur-md border-t border-line pb-safe">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <button type="submit" disabled={create.isPending || update.isPending} className="btn-primary w-full">
-            {create.isPending || update.isPending ? "Saving…" : existing ? "Save changes" : "Save trade"}
-          </button>
-        </div>
-      </div>
+      <ActionBar>
+        <button type="submit" disabled={create.isPending || update.isPending} className="btn-primary w-full">
+          {create.isPending || update.isPending ? "Saving…" : existing ? "Save changes" : "Save trade"}
+        </button>
+      </ActionBar>
     </form>
   );
 }

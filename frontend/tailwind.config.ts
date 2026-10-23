@@ -16,12 +16,18 @@ const config: Config = {
         "faint": "rgb(var(--faint) / <alpha-value>)",
         "primary": "rgb(var(--primary) / <alpha-value>)",
         "on-primary": "rgb(var(--on-primary) / <alpha-value>)",
+        "hero": "rgb(var(--hero) / <alpha-value>)",
+        "on-hero": "rgb(var(--on-hero) / <alpha-value>)",
+        "hero-muted": "rgb(var(--hero-muted) / <alpha-value>)",
+        "sun": "rgb(var(--sun) / <alpha-value>)",
+        "on-sun": "rgb(var(--on-sun) / <alpha-value>)",
         "income": "rgb(var(--income) / <alpha-value>)",
         "expense": "rgb(var(--expense) / <alpha-value>)",
         "warn": "rgb(var(--warn) / <alpha-value>)",
       },
       fontFamily: {
-        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-body)", "system-ui", "sans-serif"],
       },
       keyframes: {
         shimmer: {

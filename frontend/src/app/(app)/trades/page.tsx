@@ -102,13 +102,6 @@ export default function TradesPage() {
         )}
       </div>
 
-      <Link
-        href="/trades/new"
-        aria-label="Log a trade"
-        className="fixed bottom-24 right-[max(1rem,calc(50%-14rem+1rem))] z-30 w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center shadow-lg shadow-black/25 active:scale-95 transition"
-      >
-        <Icon name="add" size={28} />
-      </Link>
     </>
   );
 }

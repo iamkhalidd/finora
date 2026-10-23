@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Track your naira, stick to your budgets and keep an honest trading journal.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#f6f5f2",
-    theme_color: "#1f3a68",
+    background_color: "#eef2ee",
+    theme_color: "#0b5d3b",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   };
 }

@@ -1,7 +1,7 @@
 export type ThemePref = "system" | "light" | "dark";
 
 const KEY = "theme";
-const BAR_COLOR = { light: "#f6f5f2", dark: "#111214" };
+const BAR_COLOR = { light: "#eef2ee", dark: "#0a130f" };
 
 export function getThemePref(): ThemePref {
   try {

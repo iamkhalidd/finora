@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "./Icon";
+import Avatar from "@/components/shell/Avatar";
 
 export default function PageHeader({
   title,
@@ -17,7 +19,7 @@ export default function PageHeader({
 }) {
   const router = useRouter();
   return (
-    <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md px-4 pt-3 pb-2 flex items-center gap-2 min-h-[60px]">
+    <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md px-4 pt-3 pb-2 flex items-center gap-2 min-h-[64px]">
       {back && (
         <button
           onClick={() => (typeof back === "string" ? router.push(back) : router.back())}
@@ -29,9 +31,15 @@ export default function PageHeader({
       )}
       <div className="flex-1 min-w-0">
         {subtitle && <p className="text-xs text-muted truncate">{subtitle}</p>}
-        <h1 className={`font-extrabold text-ink truncate ${back ? "text-lg" : "text-[22px] leading-tight"}`}>{title}</h1>
+        <h1 className={`font-extrabold text-ink truncate ${back ? "text-lg" : "text-[26px] leading-tight"}`}>{title}</h1>
       </div>
       {right && <div className="flex items-center gap-1.5 shrink-0">{right}</div>}
+      {/* Settings live behind the avatar on phones; the sidebar has them on desktop */}
+      {!back && (
+        <Link href="/profile" aria-label="Settings" className="lg:hidden ml-1 shrink-0">
+          <Avatar size={38} />
+        </Link>
+      )}
     </header>
   );
 }
