@@ -1,11 +1,14 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getAccessToken, setAccessToken, removeAccessToken } from "./auth";
+import { isDemo } from "./demo/mode";
 
 const baseURL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000") + "/api/v1";
 
 export const api = axios.create({ baseURL, withCredentials: true, timeout: 20000 });
 
 api.interceptors.request.use((config) => {
+  // Demo visitors talk to an in-browser stand-in; it's only downloaded when used
+  if (isDemo()) config.adapter = async (c) => (await import("./demo/adapter")).demoAdapter(c);
   const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;

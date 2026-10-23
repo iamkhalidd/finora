@@ -53,6 +53,10 @@ export default function LoginPage() {
         New to Finora?{" "}
         <Link href="/register" className="text-primary font-bold">Create an account</Link>
       </p>
+      <p className="text-sm text-muted text-center mt-2">
+        Just looking?{" "}
+        <Link href="/demo" className="text-primary font-bold">Try the demo</Link>
+      </p>
     </AuthShell>
   );
 }

@@ -61,6 +61,10 @@ export default function RegisterPage() {
         Already have an account?{" "}
         <Link href="/login" className="text-primary font-bold">Sign in</Link>
       </p>
+      <p className="text-sm text-muted text-center mt-2">
+        Just looking?{" "}
+        <Link href="/demo" className="text-primary font-bold">Try the demo</Link>
+      </p>
     </AuthShell>
   );
 }

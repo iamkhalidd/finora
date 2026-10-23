@@ -1,3 +1,5 @@
+import { clearDemo } from "./demo/mode";
+
 const KEY = "accessToken";
 
 export const getAccessToken = () =>
@@ -8,5 +10,8 @@ export const setAccessToken = (token: string) => {
 };
 
 export const removeAccessToken = () => {
-  if (typeof window !== "undefined") localStorage.removeItem(KEY);
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(KEY);
+  // Signing out of the demo also throws away its sample data
+  clearDemo();
 };

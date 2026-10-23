@@ -53,8 +53,11 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
               <Link href="/register" className="btn-primary px-6">Create an account</Link>
-              <Link href="/login" className="btn-ghost px-6">I have an account</Link>
+              <Link href="/demo" className="btn-ghost px-6">
+                <Icon name="visibility" size={20} /> Try the demo
+              </Link>
             </div>
+            <p className="text-sm text-muted mt-3">The demo uses sample data and needs no sign-up.</p>
           </div>
 
           {/* Product preview built from the app's own styles */}
@@ -105,7 +108,10 @@ export default function LandingPage() {
               <h2 className="text-3xl lg:text-4xl font-extrabold">Start with this month.</h2>
               <p className="text-hero-muted mt-2">Add a few expenses and one budget. You&apos;ll see where the money goes within a week.</p>
             </div>
-            <Link href="/register" className="btn-sun px-6 self-start lg:self-auto lg:mr-24">Create an account</Link>
+            <div className="flex flex-wrap gap-3 self-start lg:self-auto lg:mr-24">
+              <Link href="/register" className="btn-sun px-6">Create an account</Link>
+              <Link href="/demo" className="btn px-6 py-3.5 bg-white/15 text-on-hero hover:bg-white/25">Try the demo</Link>
+            </div>
           </div>
         </section>
       </main>
