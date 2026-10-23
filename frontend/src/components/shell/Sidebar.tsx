@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/ui/Icon";
 import Avatar from "./Avatar";
+import Logo from "./Logo";
 import { NAV_ITEMS, isActive, quickAdd } from "./nav";
 import { useProfile } from "@/hooks/useProfile";
 import { useImports } from "@/hooks/useImports";
@@ -17,11 +18,8 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-64 flex-col gap-1 bg-surface border-r border-line px-3 py-5">
-      <Link href="/dashboard" className="flex items-center gap-2.5 px-3 pb-6">
-        <span className="w-8 h-8 rounded-[10px] bg-hero text-on-hero flex items-center justify-center">
-          <Icon name="account_balance_wallet" size={18} filled />
-        </span>
-        <span className="font-display text-xl font-extrabold tracking-tight">Finora</span>
+      <Link href="/dashboard" className="px-3 pb-6">
+        <Logo />
       </Link>
 
       <nav className="flex flex-col gap-1">
