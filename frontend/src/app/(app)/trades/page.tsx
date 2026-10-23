@@ -9,6 +9,24 @@ import { Segmented } from "@/components/ui/Controls";
 import { EmptyState, ErrorState, Skeleton, SkeletonRows } from "@/components/ui/States";
 import { TradeFilter, useTradeStats, useTrades } from "@/hooks/useTrades";
 import { shortDate, usd } from "@/lib/format";
+import type { Direction } from "@/lib/types";
+
+function Side({ direction }: { direction: Direction }) {
+  return (
+    <span className={`inline-block w-12 text-center rounded-lg py-1 text-[11px] font-extrabold shrink-0 ${direction === "BUY" ? "bg-income/10 text-income" : "bg-expense/10 text-expense"}`}>
+      {direction}
+    </span>
+  );
+}
+
+function Result({ pnl }: { pnl: number | null }) {
+  if (pnl === null) return <span className="text-xs font-bold text-primary bg-primary/10 rounded-full px-2.5 py-1">Open</span>;
+  return (
+    <span className={`text-[15px] font-bold tabular-nums whitespace-nowrap ${pnl > 0 ? "text-income" : pnl < 0 ? "text-expense" : "text-muted"}`}>
+      {usd(pnl, { sign: true })}
+    </span>
+  );
+}
 
 export default function TradesPage() {
   const router = useRouter();
@@ -24,43 +42,37 @@ export default function TradesPage() {
       />
 
       <div className="px-4 flex flex-col gap-4 pb-4">
-        <section className="card p-5">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm text-muted font-semibold">Net P&L (closed trades)</p>
-              {stats ? (
-                <p className={`text-[30px] font-extrabold tabular-nums leading-tight mt-0.5 ${stats.total_p_l > 0 ? "text-income" : stats.total_p_l < 0 ? "text-expense" : ""}`}>
-                  {usd(stats.total_p_l, { sign: true })}
-                </p>
-              ) : (
-                <Skeleton className="h-9 w-36 mt-1" />
-              )}
-            </div>
-            <span className="text-[11px] font-bold text-muted bg-surface-2 rounded-full px-2.5 py-1">USD</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+        <section className="hero p-5 lg:p-6">
+          <p className="text-sm font-semibold text-hero-muted">Net P&L in USD, closed trades</p>
+          {stats ? (
+            <p className="figure text-[38px] lg:text-[46px] leading-[1.05] mt-1">{usd(stats.total_p_l, { sign: true })}</p>
+          ) : (
+            <Skeleton className="h-10 w-40 mt-2 opacity-30" />
+          )}
+          <div className="flex flex-wrap gap-2 mt-4">
             {[
               { label: "Win rate", value: stats?.total_trades ? `${stats.win_rate}%` : "—" },
               { label: "Won / lost", value: stats ? `${stats.wins} / ${stats.losses}` : "—" },
               { label: "Profit factor", value: stats?.profit_factor != null ? stats.profit_factor.toFixed(2) : "—" },
             ].map((s) => (
-              <div key={s.label} className="rounded-xl bg-bg/50 py-2.5">
-                <p className="font-extrabold tabular-nums">{s.value}</p>
-                <p className="text-[11px] text-muted font-semibold">{s.label}</p>
-              </div>
+              <span key={s.label} className="rounded-full bg-white/15 px-3 py-1.5 text-[13px] font-semibold tabular-nums">
+                <span className="text-hero-muted">{s.label}</span> {s.value}
+              </span>
             ))}
           </div>
         </section>
 
-        <Segmented<TradeFilter>
-          value={filter}
-          onChange={setFilter}
-          options={[
-            { value: "all", label: "All" },
-            { value: "open", label: `Open${stats?.open_trades ? ` (${stats.open_trades})` : ""}` },
-            { value: "closed", label: "Closed" },
-          ]}
-        />
+        <div className="lg:w-96">
+          <Segmented<TradeFilter>
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { value: "all", label: "All" },
+              { value: "open", label: `Open${stats?.open_trades ? ` (${stats.open_trades})` : ""}` },
+              { value: "closed", label: "Closed" },
+            ]}
+          />
+        </div>
 
         {trades.isLoading ? (
           <SkeletonRows count={5} />
@@ -76,29 +88,53 @@ export default function TradesPage() {
             />
           </div>
         ) : (
-          <div className="card divide-y divide-line overflow-hidden">
-            {trades.data!.map((t) => {
-              const open = t.exit_price == null;
-              return (
-                <Link key={t.id} href={`/trades/${t.id}`} className="flex items-center gap-3 px-4 py-3.5 hover:bg-surface-2/50">
-                  <span className={`w-12 text-center rounded-lg py-1 text-[11px] font-extrabold shrink-0 ${t.direction === "BUY" ? "bg-income/10 text-income" : "bg-expense/10 text-expense"}`}>
-                    {t.direction}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold">{t.pair} <span className="text-muted font-semibold">· {t.lot_size} lot{t.lot_size === 1 ? "" : "s"}</span></p>
-                    <p className="text-xs text-muted truncate">{[shortDate(t.date), t.session, t.strategy].filter(Boolean).join(" · ")}</p>
-                  </div>
-                  {open ? (
-                    <span className="text-xs font-bold text-primary bg-primary/10 rounded-full px-2.5 py-1">Open</span>
-                  ) : (
-                    <span className={`text-[15px] font-bold tabular-nums ${t.p_l > 0 ? "text-income" : t.p_l < 0 ? "text-expense" : "text-muted"}`}>
-                      {usd(t.p_l, { sign: true })}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+          <>
+            <div className="card divide-y divide-line overflow-hidden lg:hidden">
+              {trades.data!.map((t) => {
+                const open = t.exit_price == null;
+                return (
+                  <Link key={t.id} href={`/trades/${t.id}`} className="flex items-center gap-3 px-4 py-3.5 hover:bg-surface-2/50">
+                    <Side direction={t.direction} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold">{t.pair} <span className="text-muted font-semibold">· {t.lot_size} lot{t.lot_size === 1 ? "" : "s"}</span></p>
+                      <p className="text-xs text-muted truncate">{[shortDate(t.date), t.session, t.strategy].filter(Boolean).join(" · ")}</p>
+                    </div>
+                    <Result pnl={open ? null : t.p_l} />
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="hidden lg:block card overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted border-b border-line">
+                    <th className="font-semibold px-4 py-3">Date</th>
+                    <th className="font-semibold px-4 py-3">Instrument</th>
+                    <th className="font-semibold px-4 py-3">Side</th>
+                    <th className="font-semibold px-4 py-3 text-right">Lots</th>
+                    <th className="font-semibold px-4 py-3">Session</th>
+                    <th className="font-semibold px-4 py-3">Strategy</th>
+                    <th className="font-semibold px-4 py-3 text-right">Result</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {trades.data!.map((t) => (
+                    <tr key={t.id} onClick={() => router.push(`/trades/${t.id}`)} className="cursor-pointer hover:bg-surface-2/50 transition-colors">
+                      <td className="px-4 py-3 text-muted whitespace-nowrap">{shortDate(t.date)}</td>
+                      <td className="px-4 py-3 font-bold">
+                        <Link href={`/trades/${t.id}`} onClick={(e) => e.stopPropagation()}>{t.pair}</Link>
+                      </td>
+                      <td className="px-4 py-3"><Side direction={t.direction} /></td>
+                      <td className="px-4 py-3 text-right tabular-nums">{t.lot_size}</td>
+                      <td className="px-4 py-3 text-muted">{t.session}</td>
+                      <td className="px-4 py-3 text-muted max-w-[200px] truncate">{t.strategy ?? "—"}</td>
+                      <td className="px-4 py-3 text-right"><Result pnl={t.exit_price == null ? null : t.p_l} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

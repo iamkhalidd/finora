@@ -19,7 +19,7 @@ export default function PageHeader({
 }) {
   const router = useRouter();
   return (
-    <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md px-4 pt-3 pb-2 flex items-center gap-2 min-h-[64px]">
+    <header className="sticky top-0 z-30 bg-bg/90 backdrop-blur-md lg:bg-bg lg:backdrop-blur-none px-4 pt-3 pb-2 flex items-center gap-2 min-h-[64px]">
       {back && (
         <button
           onClick={() => (typeof back === "string" ? router.push(back) : router.back())}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/ui/Icon";
 import PageHeader from "@/components/ui/PageHeader";
+import Avatar from "@/components/shell/Avatar";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { Field, Segmented } from "@/components/ui/Controls";
 import { FormError } from "@/components/ui/States";
@@ -98,11 +99,9 @@ export default function ProfilePage() {
       <PageHeader title="Settings" back="/dashboard" />
       <div className="px-4 flex flex-col gap-5 pb-6">
         <section className="flex items-center gap-4 px-1">
-          <div className="w-16 h-16 rounded-full bg-primary/15 text-primary flex items-center justify-center text-2xl font-extrabold">
-            {user?.name.charAt(0).toUpperCase() ?? ""}
-          </div>
+          <Avatar size={64} />
           <div className="min-w-0">
-            <p className="text-lg font-extrabold truncate">{user?.name ?? " "}</p>
+            <p className="font-display text-xl font-extrabold truncate">{user?.name ?? " "}</p>
             <p className="text-sm text-muted truncate">{user?.email}</p>
           </div>
         </section>

@@ -15,7 +15,7 @@ function Breakdown({ title, rows }: { title: string; rows: GroupStat[] }) {
   if (rows.length === 0) return null;
   return (
     <section>
-      <h2 className="font-extrabold px-1 mb-2">{title}</h2>
+      <h2 className="text-lg font-bold px-1 mb-2">{title}</h2>
       <div className="card divide-y divide-line overflow-hidden">
         {rows.map((r) => (
           <div key={r.name} className="flex items-center gap-3 px-4 py-3">
@@ -42,16 +42,18 @@ export default function TradeStatsPage() {
     <>
       <PageHeader title="Performance" back />
       <div className="px-4 flex flex-col gap-5 pb-6">
-        <Segmented<Period>
-          value={period}
-          onChange={setPeriod}
-          options={[
-            { value: "month", label: "30 days" },
-            { value: "3m", label: "3 months" },
-            { value: "year", label: "1 year" },
-            { value: "all", label: "All" },
-          ]}
-        />
+        <div className="lg:w-[28rem]">
+          <Segmented<Period>
+            value={period}
+            onChange={setPeriod}
+            options={[
+              { value: "month", label: "30 days" },
+              { value: "3m", label: "3 months" },
+              { value: "year", label: "1 year" },
+              { value: "all", label: "All" },
+            ]}
+          />
+        </div>
 
         {isLoading ? (
           <Skeleton className="h-56 rounded-2xl" />
@@ -63,16 +65,17 @@ export default function TradeStatsPage() {
           </div>
         ) : (
           <>
-            <section className="card p-4">
+            <section className="card p-4 lg:p-6">
               <p className="text-sm text-muted font-semibold">P&L over period</p>
-              <p className={`text-[28px] font-extrabold tabular-nums ${data.total_p_l >= 0 ? "text-income" : "text-expense"}`}>
+              <p className={`figure text-[32px] ${data.total_p_l >= 0 ? "text-income" : "text-expense"}`}>
                 {usd(data.total_p_l, { sign: true })}
               </p>
-              <div className="mt-3"><AreaChart data={data.cumulative_p_l} /></div>
+              <div className="mt-3 lg:hidden"><AreaChart data={data.cumulative_p_l} /></div>
+              <div className="mt-4 hidden lg:block"><AreaChart data={data.cumulative_p_l} height={240} /></div>
             </section>
 
             {stats && (
-              <section className="grid grid-cols-2 gap-3">
+              <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   { label: "Best trade", value: stats.best_trade != null ? usd(stats.best_trade, { sign: true }) : "—" },
                   { label: "Worst trade", value: stats.worst_trade != null ? usd(stats.worst_trade, { sign: true }) : "—" },
@@ -81,15 +84,17 @@ export default function TradeStatsPage() {
                 ].map((s) => (
                   <div key={s.label} className="card px-4 py-3">
                     <p className="text-xs text-muted font-semibold">{s.label}</p>
-                    <p className="font-extrabold tabular-nums mt-0.5">{s.value}</p>
+                    <p className="figure text-lg mt-0.5">{s.value}</p>
                   </div>
                 ))}
               </section>
             )}
 
-            <Breakdown title="By instrument" rows={data.by_pair} />
-            <Breakdown title="By session" rows={data.by_session} />
-            <Breakdown title="By strategy" rows={data.by_strategy} />
+            <div className="grid gap-5 lg:grid-cols-3 lg:items-start">
+              <Breakdown title="By instrument" rows={data.by_pair} />
+              <Breakdown title="By session" rows={data.by_session} />
+              <Breakdown title="By strategy" rows={data.by_strategy} />
+            </div>
           </>
         )}
       </div>

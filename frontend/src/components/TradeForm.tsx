@@ -100,10 +100,10 @@ export default function TradeForm({ existing }: { existing?: Trade }) {
   };
 
   return (
-    <form onSubmit={submit} className="px-4 flex flex-col gap-5 pb-28">
+    <form onSubmit={submit} className="px-4 flex flex-col gap-5 pb-28 lg:mx-4 lg:mb-4 lg:p-6 lg:pb-6 lg:bg-surface lg:border lg:border-line lg:rounded-[24px]">
       <Field label="Instrument" htmlFor="pair">
         <input id="pair" value={pair} onChange={(e) => setPair(e.target.value.toUpperCase())} placeholder="XAUUSD" className="input font-bold uppercase" autoCapitalize="characters" />
-        <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 pt-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 pt-1 lg:flex-wrap lg:mx-0 lg:px-0">
           {POPULAR_INSTRUMENTS.map((p) => (
             <button key={p} type="button" onClick={() => setPair(p)} className={`shrink-0 ${pair === p ? "chip-on" : "chip-off"}`}>{p}</button>
           ))}

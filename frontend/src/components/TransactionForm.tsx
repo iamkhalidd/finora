@@ -79,7 +79,7 @@ export default function TransactionForm({ initialType = "expense", existing }: {
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); submit(false); }}
-      className="px-4 flex flex-col gap-5 pb-36"
+      className="px-4 flex flex-col gap-5 pb-36 lg:mx-4 lg:mb-4 lg:p-6 lg:pb-6 lg:bg-surface lg:border lg:border-line lg:rounded-[24px]"
     >
       <Segmented<TxType>
         value={type}

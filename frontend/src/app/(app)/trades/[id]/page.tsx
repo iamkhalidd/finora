@@ -80,57 +80,64 @@ export default function TradeDetailPage() {
         right={<HeaderButton icon="edit" label="Edit trade" onClick={() => router.push(`/trades/${trade.id}/edit`)} />}
       />
 
-      <div className="px-4 flex flex-col gap-4 pb-6">
-        <section className="card p-5 text-center">
-          <span className={`inline-block rounded-lg px-2.5 py-1 text-xs font-extrabold ${trade.direction === "BUY" ? "bg-income/10 text-income" : "bg-expense/10 text-expense"}`}>
-            {trade.direction}
-          </span>
-          {open ? (
-            <>
-              <p className="text-[28px] font-extrabold text-primary mt-2">Open</p>
-              <p className="text-sm text-muted">Close it when you exit to record the result.</p>
-              <button onClick={() => { setExit(""); setPnl(""); setPnlTouched(false); setError(""); setClosing(true); }} className="btn-primary mt-4 w-full">
-                <Icon name="task_alt" size={20} /> Close trade
+      <div className="px-4 pb-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:items-start">
+        {/* On phones these items join the parent grid so Delete can drop to the very end */}
+        <div className="contents lg:flex lg:flex-col lg:gap-4 lg:min-w-0">
+          <section className="card p-5 text-center lg:p-7 order-1 lg:order-none">
+            <span className={`inline-block rounded-lg px-2.5 py-1 text-xs font-extrabold ${trade.direction === "BUY" ? "bg-income/10 text-income" : "bg-expense/10 text-expense"}`}>
+              {trade.direction}
+            </span>
+            {open ? (
+              <>
+                <p className="text-[28px] font-extrabold text-primary mt-2">Open</p>
+                <p className="text-sm text-muted">Close it when you exit to record the result.</p>
+                <button onClick={() => { setExit(""); setPnl(""); setPnlTouched(false); setError(""); setClosing(true); }} className="btn-primary mt-4 w-full">
+                  <Icon name="task_alt" size={20} /> Close trade
+                </button>
+              </>
+            ) : (
+              <>
+                <p className={`figure text-[38px] mt-2 ${trade.p_l > 0 ? "text-income" : trade.p_l < 0 ? "text-expense" : ""}`}>
+                  {usd(trade.p_l, { sign: true })}
+                </p>
+                <p className="text-sm text-muted">{trade.p_l > 0 ? "Win" : trade.p_l < 0 ? "Loss" : "Break-even"}</p>
+              </>
+            )}
+          </section>
+
+          <div className="order-3 lg:order-none">
+            <ConfirmDelete
+              label="Delete trade"
+              pending={remove.isPending}
+              onConfirm={async () => {
+                await remove.mutateAsync(trade.id);
+                router.replace("/trades");
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 min-w-0 order-2 lg:order-none">
+          <section className="card grid grid-cols-2">
+            {details.map(([label, value], i) => (
+              <div key={label} className={`px-4 py-3 border-line ${i % 2 === 0 ? "border-r" : ""} ${i < details.length - 2 ? "border-b" : ""}`}>
+                <p className="text-xs text-muted font-semibold">{label}</p>
+                <p className="font-bold tabular-nums truncate">{value}</p>
+              </div>
+            ))}
+          </section>
+
+          <section className="card p-4">
+            <p className="text-xs text-muted font-semibold mb-1.5">Journal notes</p>
+            {trade.notes ? (
+              <p className="text-sm leading-relaxed whitespace-pre-line">{trade.notes}</p>
+            ) : (
+              <button onClick={() => router.push(`/trades/${trade.id}/edit`)} className="text-sm text-primary font-semibold">
+                Add notes on why you took this trade →
               </button>
-            </>
-          ) : (
-            <>
-              <p className={`text-[34px] font-extrabold tabular-nums mt-2 ${trade.p_l > 0 ? "text-income" : trade.p_l < 0 ? "text-expense" : ""}`}>
-                {usd(trade.p_l, { sign: true })}
-              </p>
-              <p className="text-sm text-muted">{trade.p_l > 0 ? "Win" : trade.p_l < 0 ? "Loss" : "Break-even"}</p>
-            </>
-          )}
-        </section>
-
-        <section className="card grid grid-cols-2">
-          {details.map(([label, value], i) => (
-            <div key={label} className={`px-4 py-3 border-line ${i % 2 === 0 ? "border-r" : ""} ${i < details.length - 2 ? "border-b" : ""}`}>
-              <p className="text-xs text-muted font-semibold">{label}</p>
-              <p className="font-bold tabular-nums truncate">{value}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="card p-4">
-          <p className="text-xs text-muted font-semibold mb-1.5">Journal notes</p>
-          {trade.notes ? (
-            <p className="text-sm leading-relaxed whitespace-pre-line">{trade.notes}</p>
-          ) : (
-            <button onClick={() => router.push(`/trades/${trade.id}/edit`)} className="text-sm text-primary font-semibold">
-              Add notes on why you took this trade →
-            </button>
-          )}
-        </section>
-
-        <ConfirmDelete
-          label="Delete trade"
-          pending={remove.isPending}
-          onConfirm={async () => {
-            await remove.mutateAsync(trade.id);
-            router.replace("/trades");
-          }}
-        />
+            )}
+          </section>
+        </div>
       </div>
 
       <BottomSheet open={closing} onClose={closeSheet} title={`Close ${trade.pair} ${trade.direction.toLowerCase()}`}>

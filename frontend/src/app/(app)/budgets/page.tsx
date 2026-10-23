@@ -82,7 +82,7 @@ export default function BudgetsPage() {
       <PageHeader title="Budgets" right={<HeaderButton icon="add" label="New budget" onClick={() => openAdd()} />} />
 
       <div className="px-4 flex flex-col gap-4 pb-4">
-        <MonthSwitcher month={month} onChange={setMonth} />
+        <div className="lg:w-72"><MonthSwitcher month={month} onChange={setMonth} /></div>
 
         {isLoading ? (
           <SkeletonRows count={4} />
@@ -98,37 +98,37 @@ export default function BudgetsPage() {
             />
           </div>
         ) : (
-          <>
-            <section className="card p-5">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm text-muted font-semibold">Spent {isCurrent ? "so far" : `in ${monthLabel(month)}`}</p>
-                  <p className="text-[28px] font-extrabold tabular-nums leading-tight mt-0.5">{naira(totalSpent)}</p>
-                  <p className="text-sm text-muted">of {naira(totalLimit)} budgeted</p>
-                </div>
-                <span className={`text-sm font-extrabold tabular-nums ${tone(totalPct).text}`}>{Math.round(totalPct)}%</span>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:items-start">
+            <section className="hero p-5 lg:p-6">
+              <p className="text-sm font-semibold text-hero-muted">Spent {isCurrent ? "so far" : `in ${monthLabel(month)}`}</p>
+              <p className="figure text-[38px] leading-[1.05] mt-1">{naira(totalSpent)}</p>
+              <p className="text-sm text-hero-muted">of {naira(totalLimit)} budgeted · {Math.round(totalPct)}%</p>
+              <div className="mt-4 h-2.5 rounded-full bg-white/15 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${totalPct >= 100 ? "bg-expense" : "bg-sun"}`}
+                  style={{ width: `${Math.min(totalPct, 100)}%` }}
+                />
               </div>
-              <div className="mt-4"><Progress pct={totalPct} /></div>
               {isCurrent && (
-                <p className="text-sm mt-3">
+                <p className="text-sm mt-4">
                   {remaining > 0 ? (
                     <>
-                      <b className="tabular-nums">{naira(remaining)}</b> <span className="text-muted">left. That&apos;s about</span>{" "}
-                      <b className="tabular-nums">{naira(Math.floor(remaining / days))}</b> <span className="text-muted">a day for {days} day{days === 1 ? "" : "s"}.</span>
+                      <b className="tabular-nums">{naira(remaining)}</b> <span className="text-hero-muted">left. That&apos;s about</span>{" "}
+                      <b className="tabular-nums">{naira(Math.floor(remaining / days))}</b> <span className="text-hero-muted">a day for {days} day{days === 1 ? "" : "s"}.</span>
                     </>
                   ) : (
-                    <span className="text-expense font-semibold">You&apos;re {naira(-remaining)} over your total budget.</span>
+                    <b>You&apos;re {naira(-remaining)} over your total budget.</b>
                   )}
                 </p>
               )}
             </section>
 
-            <section className="card divide-y divide-line overflow-hidden">
+            <section className="grid gap-3 sm:grid-cols-2">
               {list.map((b) => {
                 const pct = b.limit ? (b.spent / b.limit) * 100 : 0;
                 const left = b.limit - b.spent;
                 return (
-                  <button key={b.id} onClick={() => openEdit(b)} className="w-full text-left px-4 py-4 flex flex-col gap-2.5 hover:bg-surface-2/50">
+                  <button key={b.id} onClick={() => openEdit(b)} className="card text-left p-4 flex flex-col gap-3 hover:bg-surface-2/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-surface-2 text-muted flex items-center justify-center shrink-0">
                         <Icon name={categoryIcon(b.category)} size={20} />
@@ -137,24 +137,22 @@ export default function BudgetsPage() {
                         <p className="text-sm font-bold truncate">{b.category}</p>
                         <p className="text-xs text-muted tabular-nums">{naira(b.spent)} of {naira(b.limit)}</p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-extrabold tabular-nums ${tone(pct).text}`}>
-                          {left >= 0 ? naira(left) : naira(-left)}
-                        </p>
-                        <p className="text-[11px] text-muted">{left >= 0 ? "left" : "over"}</p>
-                      </div>
+                      <span className={`text-sm font-extrabold tabular-nums ${tone(pct).text}`}>{Math.round(pct)}%</span>
                     </div>
                     <Progress pct={pct} />
+                    <p className={`text-xs font-semibold ${left >= 0 ? "text-muted" : "text-expense"}`}>
+                      {left >= 0 ? `${naira(left)} left` : `${naira(-left)} over`}
+                    </p>
                   </button>
                 );
               })}
             </section>
-          </>
+          </div>
         )}
 
         {unbudgeted.length > 0 && !isLoading && (
-          <section>
-            <h2 className="font-extrabold px-1 mb-2">Spending without a budget</h2>
+          <section className="lg:max-w-xl">
+            <h2 className="text-lg font-bold px-1 mb-2">Spending without a budget</h2>
             <div className="card divide-y divide-line overflow-hidden">
               {unbudgeted.map((c) => (
                 <div key={c.name} className="flex items-center gap-3 px-4 py-3">
